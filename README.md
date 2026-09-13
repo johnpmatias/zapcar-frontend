@@ -1,32 +1,38 @@
-# React + TypeScript + Vite
+# ZapCar — Painel do Lojista
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Front-end da "Fundação" do ZapCar: React + Vite + TypeScript + Tailwind + shadcn/ui, com autenticação via Supabase Auth.
 
-Currently, two official plugins are available:
+## Configuração
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+1. Instale as dependências:
 
-## React Compiler
+   ```bash
+   npm install
+   ```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+2. Copie o arquivo de variáveis de ambiente e preencha os valores:
 
-## Expanding the Oxlint configuration
+   ```bash
+   cp .env.example .env.local
+   ```
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+   Edite `.env.local` com os valores do seu projeto Supabase:
 
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+   - `VITE_SUPABASE_URL`: a URL do projeto.
+   - `VITE_SUPABASE_PUBLISHABLE_KEY`: a chave **publishable** (não a `secret`!), encontrada em Settings → API Keys no painel do Supabase. Usar a chave errada aqui já custou bastante tempo de debug — confira o tipo da chave antes de colar.
+
+3. Rode o servidor de desenvolvimento:
+
+   ```bash
+   npm run dev
+   ```
+
+## Build
+
+```bash
+npm run build
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+## Deploy
+
+Pushes para `main` são publicados automaticamente no Vercel.

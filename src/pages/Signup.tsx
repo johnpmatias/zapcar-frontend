@@ -24,7 +24,7 @@ export default function SignupPage() {
     setError(null)
     setSubmitting(true)
 
-    const { error: signUpError } = await supabase.auth.signUp({
+    const { data, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
     })
@@ -33,6 +33,11 @@ export default function SignupPage() {
 
     if (signUpError) {
       setError(signUpError.message)
+      return
+    }
+
+    if (!data.session) {
+      setError('Confira seu e-mail para confirmar a conta antes de entrar.')
       return
     }
 
@@ -69,7 +74,7 @@ export default function SignupPage() {
                 required
               />
             </div>
-            {error && <p className="text-sm text-red-600">{error}</p>}
+            {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
             <Button type="submit" disabled={submitting}>
               {submitting ? 'Criando conta...' : 'Criar conta'}
             </Button>
