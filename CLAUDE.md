@@ -40,6 +40,14 @@ Cada sub-projeto segue o mesmo ciclo: brainstorming (spec) → writing-plans (pl
 
 Analista de sistemas, não programa profissionalmente há mais de 12 anos mas entende bem lógica de programação. É autista e tem TDAH — precisa de previsibilidade maior que a média e a motivação para o projeto oscila. Por isso: trabalhar em pedaços pequenos e bem definidos, cada um terminando em algo visível/testável, em vez de um esforço grande e aberto. Manter specs e planos escritos e versionados como âncora externa pra retomar contexto depois de uma pausa.
 
+## Pendência conhecida (não bloqueante)
+
+O trigger `handle_new_user` cria lojas novas com `vitrine_publica = true` por padrão (deveria ser `false` até o lojista ativar de propósito). Não é urgente (loja nova nasce sem `slug`, então não é alcançável publicamente), mas vale rodar antes de começar o sub-projeto da Vitrine Pública:
+
+```sql
+alter table public.lojas alter column vitrine_publica set default false;
+```
+
 ## Back-end (referência rápida, fora deste repo)
 
 - Supabase: schema com `lojas`, `leads`, `veiculos`, `agendamentos`, `Interacoes`, `lojas_config_whatsapp`, `lojas_config_ia`, `user_roles`. RLS por `loja_id`/`auth.uid()`. Trigger `handle_new_user` cria `lojas` + `user_roles` + `lojas_config_ia` automaticamente no cadastro (corrigido nesta sessão — antes só criava `lojas`).
