@@ -1,3 +1,16 @@
+import { useAuth } from '@/contexts/AuthContext'
+import { Button } from '@/components/ui/button'
+
 export default function DashboardPage() {
-  return <div className="p-8">Painel (placeholder)</div>
+  const { user, signOut } = useAuth()
+
+  return (
+    <div className="flex min-h-screen flex-col items-center justify-center gap-4 p-4">
+      <h1 className="text-2xl font-semibold">Painel em construção</h1>
+      <p className="text-muted-foreground">Logado como {user?.email}</p>
+      <Button variant="outline" onClick={() => signOut()}>
+        Sair
+      </Button>
+    </div>
+  )
 }
