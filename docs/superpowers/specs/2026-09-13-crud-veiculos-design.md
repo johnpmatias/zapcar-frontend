@@ -15,7 +15,7 @@ Ao final, o lojista consegue: ver a lista de veículos da própria loja, cadastr
 
 ## Fora de escopo (fica pra sub-projetos futuros)
 
-- Reordenação manual dos veículos na listagem (`ordem` fica no valor default; drag-and-drop fica pra quando a Vitrine Pública precisar disso).
+- Reordenação manual dos veículos na listagem (`ordem` fica no valor default). Decisão registrada: entra como uma tarefa pequena dentro do sub-projeto 3 (Vitrine Pública), porque só ali existe uma listagem pública pra dar sentido a reordenar — construir isso antes não teria nada visível pra mostrar.
 - Qualquer UI pública de exibição dos veículos (`destaque`, `foto_capa`, etc. são gravados aqui, mas só são *consumidos* pela Vitrine Pública, sub-projeto 3).
 - Regras de negócio de estoque além de validação de campos (ex.: placa duplicada) — não há necessidade concreta identificada ainda.
 - Suporte a múltiplos usuários por loja (`user_id` fica sem uso; hoje a relação loja↔usuário é 1:1 via o trigger `handle_new_user`).
@@ -144,6 +144,7 @@ A partir deste sub-projeto, TDD guia a implementação (`Vitest` + `React Testin
 - **`placa_final`:** não é um campo do formulário — é derivado de `placa` no código (últimos caracteres, para exibição parcial futura na vitrine pública sem expor a placa completa).
 - **`titulo`:** não é um campo do formulário — gerado automaticamente a partir de `marca` + `modelo` + `ano_modelo` ao salvar.
 - **Regras de estoque:** por ora, só validação de campos. Nenhuma regra de negócio adicional (ex.: placa duplicada) foi identificada como necessária; fica pra quando surgir um caso real.
+- **Reordenação (`ordem`):** confirmado que fica fora deste sub-projeto e entra como tarefa dentro do plano do sub-projeto 3 (Vitrine Pública), quando a listagem pública que justifica reordenar existir.
 
 ## Próximos sub-projetos (fora de escopo aqui, só pra contexto)
 
