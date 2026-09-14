@@ -1,11 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import VeiculosPage from '@/pages/Veiculos'
-import { listVeiculos } from '@/lib/veiculos'
+import { listVeiculos, deleteVeiculo } from '@/lib/veiculos'
 
 vi.mock('@/lib/veiculos', () => ({
   listVeiculos: vi.fn(),
+  deleteVeiculo: vi.fn(),
 }))
 
 beforeEach(() => {
@@ -55,5 +57,20 @@ describe('VeiculosPage', () => {
 
     expect(await screen.findByText('falha de rede')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /tentar novamente/i })).toBeInTheDocument()
+  })
+
+  it('exclui um veículo após confirmação', async () => {
+    vi.mocked(listVeiculos).mockResolvedValue([
+      { id: '1', marca: 'Honda', modelo: 'Civic', ano_modelo: 2024, preco: 95000, status: 'disponivel' } as never,
+    ])
+    vi.mocked(deleteVeiculo).mockResolvedValue(undefined)
+    const usuario = userEvent.setup()
+
+    renderPagina()
+
+    await usuario.click(await screen.findByRole('button', { name: /excluir/i }))
+    await usuario.click(screen.getByRole('button', { name: /confirmar exclusão/i }))
+
+    expect(deleteVeiculo).toHaveBeenCalledWith('1')
   })
 })
