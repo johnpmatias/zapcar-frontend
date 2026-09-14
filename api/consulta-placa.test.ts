@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { buscarDadosPlaca } from './consulta-placa'
+import { buscarDadosPlaca } from './consulta-placa.js'
 
 beforeEach(() => {
   vi.stubGlobal('fetch', vi.fn())

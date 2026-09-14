@@ -29,6 +29,22 @@ export type ResultadoConsultaPlaca =
   | { ok: true; data: DadosPlaca }
   | { ok: false; codigo: CodigoErroConsultaPlaca }
 
+interface RespostaApiPlacas {
+  marca: string
+  modelo: string
+  ano: string
+  anoModelo: string
+  cor?: string
+  extra?: {
+    combustivel?: string
+    caixa_cambio?: string
+    carroceria?: string
+  }
+  fipe?: {
+    dados?: Array<{ texto_modelo: string; texto_valor: string; score: number }>
+  }
+}
+
 function normalizarCombustivel(valor: string | undefined): string | undefined {
   if (!valor) return undefined
   const texto = valor.toLowerCase()
@@ -65,7 +81,7 @@ export async function buscarDadosPlaca(placa: string, token: string): Promise<Re
       return { ok: false, codigo: 'indisponivel' }
     }
 
-    const corpo = await resposta.json()
+    const corpo = (await resposta.json()) as RespostaApiPlacas
 
     const versoes: VersaoFipe[] = (corpo.fipe?.dados ?? [])
       .map((item: { texto_modelo: string; texto_valor: string; score: number }) => ({
