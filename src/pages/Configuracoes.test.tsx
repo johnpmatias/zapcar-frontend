@@ -278,4 +278,27 @@ describe('ConfiguracoesPage', () => {
       expect.objectContaining({ meta_titulo: 'Auto Center Silva - Carros seminovos' })
     )
   })
+
+  it('edita e salva redes sociais e tracking', async () => {
+    vi.mocked(getLoja).mockResolvedValue(lojaExemplo as never)
+    vi.mocked(updateLoja).mockResolvedValue(lojaExemplo as never)
+    const usuario = userEvent.setup()
+
+    renderPagina()
+
+    await screen.findByLabelText(/nome da loja/i)
+    await usuario.click(screen.getByRole('tab', { name: /redes sociais/i }))
+    await usuario.type(screen.getByLabelText(/instagram/i), 'https://instagram.com/autocentersilva')
+    await usuario.type(screen.getByLabelText(/meta pixel/i), '123456789')
+    await usuario.click(screen.getByRole('button', { name: /salvar/i }))
+
+    expect(await screen.findByText(/alterações salvas/i)).toBeInTheDocument()
+    expect(updateLoja).toHaveBeenCalledWith(
+      'user-1',
+      expect.objectContaining({
+        instagram_url: 'https://instagram.com/autocentersilva',
+        meta_pixel_id: '123456789',
+      })
+    )
+  })
 })

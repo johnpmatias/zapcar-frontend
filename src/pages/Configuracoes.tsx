@@ -230,6 +230,7 @@ export default function ConfiguracoesPage() {
                 <TabsTrigger value="aparencia">Aparência</TabsTrigger>
                 <TabsTrigger value="vitrine">Vitrine</TabsTrigger>
                 <TabsTrigger value="seo">SEO</TabsTrigger>
+                <TabsTrigger value="social">Redes sociais</TabsTrigger>
               </TabsList>
 
               <TabsContent value="basico" className="flex flex-col gap-4">
@@ -404,6 +405,35 @@ export default function ConfiguracoesPage() {
                   value={form.watch('og_image_url') as string | undefined}
                   onChange={(url) => form.setValue('og_image_url', url)}
                 />
+              </TabsContent>
+
+              <TabsContent value="social" className="flex flex-col gap-4">
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="instagram_url">Instagram</Label>
+                  <Input id="instagram_url" {...form.register('instagram_url')} />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="facebook_url">Facebook</Label>
+                  <Input id="facebook_url" {...form.register('facebook_url')} />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="tiktok_url">TikTok</Label>
+                  <Input id="tiktok_url" {...form.register('tiktok_url')} />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="youtube_url">YouTube</Label>
+                  <Input id="youtube_url" {...form.register('youtube_url')} />
+                </div>
+
+                <p className="text-sm font-medium">Tracking</p>
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="meta_pixel_id">Meta Pixel ID</Label>
+                  <Input id="meta_pixel_id" {...form.register('meta_pixel_id')} />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="google_tag_id">Google Tag ID</Label>
+                  <Input id="google_tag_id" {...form.register('google_tag_id')} />
+                </div>
               </TabsContent>
             </Tabs>
 
