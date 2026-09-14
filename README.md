@@ -43,6 +43,8 @@ npm run build
 npm test
 ```
 
+Cobre a suíte automatizada (unitária/integração). Não substitui uma verificação manual em ambiente real (Supabase + `vercel dev`) antes de um release.
+
 ## Deploy
 
 Pushes para `main` são publicados automaticamente no Vercel.
