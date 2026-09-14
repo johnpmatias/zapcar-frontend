@@ -6,6 +6,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { useLoja } from '@/hooks/useLoja'
 import { lojaSchema, type LojaFormValues } from '@/lib/loja-schema'
 import { updateLoja, type LojaPayload } from '@/lib/loja'
+import { CorField } from '@/components/loja/CorField'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -209,6 +210,7 @@ export default function ConfiguracoesPage() {
               <TabsList>
                 <TabsTrigger value="basico">Dados básicos</TabsTrigger>
                 <TabsTrigger value="endereco">Endereço</TabsTrigger>
+                <TabsTrigger value="aparencia">Aparência</TabsTrigger>
               </TabsList>
 
               <TabsContent value="basico" className="flex flex-col gap-4">
@@ -301,6 +303,21 @@ export default function ConfiguracoesPage() {
                   </div>
                 </div>
                 <p className="text-sm text-muted-foreground">Deixe os dois campos de um dia em branco se a loja não abre nesse dia.</p>
+              </TabsContent>
+
+              <TabsContent value="aparencia" className="flex flex-col gap-4">
+                <CorField
+                  id="cor_primaria"
+                  label="Cor primária"
+                  value={form.watch('cor_primaria') as string | undefined}
+                  onChange={(valor) => form.setValue('cor_primaria', valor)}
+                />
+                <CorField
+                  id="cor_secundaria"
+                  label="Cor secundária"
+                  value={form.watch('cor_secundaria') as string | undefined}
+                  onChange={(valor) => form.setValue('cor_secundaria', valor)}
+                />
               </TabsContent>
             </Tabs>
 

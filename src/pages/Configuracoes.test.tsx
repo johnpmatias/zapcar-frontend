@@ -149,4 +149,20 @@ describe('ConfiguracoesPage', () => {
     expect(await screen.findByText(/alterações salvas/i)).toBeInTheDocument()
     expect(updateLoja).toHaveBeenCalledWith('user-1', expect.objectContaining({ cidade: 'São Paulo' }))
   })
+
+  it('edita e salva a cor primária na aba Aparência', async () => {
+    vi.mocked(getLoja).mockResolvedValue(lojaExemplo as never)
+    vi.mocked(updateLoja).mockResolvedValue(lojaExemplo as never)
+    const usuario = userEvent.setup()
+
+    renderPagina()
+
+    await screen.findByLabelText(/nome da loja/i)
+    await usuario.click(screen.getByRole('tab', { name: /aparência/i }))
+    await usuario.type(screen.getByLabelText('Cor primária'), '#112233')
+    await usuario.click(screen.getByRole('button', { name: /salvar/i }))
+
+    expect(await screen.findByText(/alterações salvas/i)).toBeInTheDocument()
+    expect(updateLoja).toHaveBeenCalledWith('user-1', expect.objectContaining({ cor_primaria: '#112233' }))
+  })
 })
