@@ -1,4 +1,4 @@
-import { useLayoutEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import type { z } from 'zod'
@@ -6,6 +6,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { useLoja } from '@/hooks/useLoja'
 import { lojaSchema, type LojaFormValues } from '@/lib/loja-schema'
 import { updateLoja, type LojaPayload } from '@/lib/loja'
+import { gerarSlug } from '@/lib/slug'
 import { CorField } from '@/components/loja/CorField'
 import { ImagemField } from '@/components/loja/ImagemField'
 import { Button } from '@/components/ui/button'
@@ -71,6 +72,21 @@ export default function ConfiguracoesPage() {
     resolver: zodResolver(lojaSchema),
     defaultValues: valoresIniciais,
   })
+
+  const nomeLoja = form.watch('nome_loja')
+  const ultimoSlugSugeridoRef = useRef<string | undefined>(undefined)
+
+  useEffect(() => {
+    if (form.formState.dirtyFields.slug) return
+    const valorAtual = form.getValues('slug')
+    // Só continua sugerindo enquanto o valor atual for vazio ou tiver sido
+    // gerado por esta própria sugestão automática (nunca sobrescreve um
+    // slug já existente carregado do servidor nem um valor editado à mão).
+    if (valorAtual && valorAtual !== ultimoSlugSugeridoRef.current) return
+    const sugestao = gerarSlug((nomeLoja as string | undefined) ?? '')
+    ultimoSlugSugeridoRef.current = sugestao
+    form.setValue('slug', sugestao)
+  }, [nomeLoja, form])
 
   useLayoutEffect(() => {
     if (!loja) return
@@ -212,6 +228,7 @@ export default function ConfiguracoesPage() {
                 <TabsTrigger value="basico">Dados básicos</TabsTrigger>
                 <TabsTrigger value="endereco">Endereço</TabsTrigger>
                 <TabsTrigger value="aparencia">Aparência</TabsTrigger>
+                <TabsTrigger value="vitrine">Vitrine</TabsTrigger>
               </TabsList>
 
               <TabsContent value="basico" className="flex flex-col gap-4">
@@ -333,6 +350,34 @@ export default function ConfiguracoesPage() {
                   value={form.watch('cor_secundaria') as string | undefined}
                   onChange={(valor) => form.setValue('cor_secundaria', valor)}
                 />
+              </TabsContent>
+
+              <TabsContent value="vitrine" className="flex flex-col gap-4">
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="slug">Endereço da vitrine</Label>
+                  <Input id="slug" {...form.register('slug')} />
+                  {form.formState.errors.slug && (
+                    <p role="alert" className="text-sm text-destructive">
+                      {form.formState.errors.slug.message}
+                    </p>
+                  )}
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="vitrine_headline">Título de destaque</Label>
+                  <Input id="vitrine_headline" {...form.register('vitrine_headline')} />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="vitrine_subheadline">Subtítulo</Label>
+                  <Input id="vitrine_subheadline" {...form.register('vitrine_subheadline')} />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="vitrine_cta_texto">Texto do botão de destaque</Label>
+                  <Input id="vitrine_cta_texto" {...form.register('vitrine_cta_texto')} />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="vitrine_cta_destino">Link do botão de destaque</Label>
+                  <Input id="vitrine_cta_destino" {...form.register('vitrine_cta_destino')} />
+                </div>
               </TabsContent>
             </Tabs>
 

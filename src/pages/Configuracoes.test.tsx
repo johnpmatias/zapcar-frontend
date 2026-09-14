@@ -192,4 +192,49 @@ describe('ConfiguracoesPage', () => {
       expect.objectContaining({ logo_url: 'https://exemplo.com/logo.png' })
     )
   })
+
+  it('sugere o slug automaticamente a partir do nome enquanto ele estiver vazio', async () => {
+    vi.mocked(getLoja).mockResolvedValue({ ...lojaExemplo, nome_loja: '', slug: null } as never)
+    const usuario = userEvent.setup()
+
+    renderPagina()
+
+    await usuario.type(await screen.findByLabelText(/nome da loja/i), 'Auto Center Silva')
+    await usuario.click(screen.getByRole('tab', { name: /vitrine/i }))
+
+    expect(screen.getByLabelText(/endereço da vitrine/i)).toHaveValue('auto-center-silva')
+  })
+
+  it('para de sugerir o slug depois que o lojista edita o campo manualmente', async () => {
+    vi.mocked(getLoja).mockResolvedValue({ ...lojaExemplo, nome_loja: '', slug: null } as never)
+    const usuario = userEvent.setup()
+
+    renderPagina()
+
+    await usuario.type(await screen.findByLabelText(/nome da loja/i), 'Auto Center Silva')
+    await usuario.click(screen.getByRole('tab', { name: /vitrine/i }))
+    const campoSlug = screen.getByLabelText(/endereço da vitrine/i)
+    await usuario.clear(campoSlug)
+    await usuario.type(campoSlug, 'minha-loja-top')
+    await usuario.click(screen.getByRole('tab', { name: /dados básicos/i }))
+    await usuario.type(screen.getByLabelText(/nome da loja/i), ' Ltda')
+    await usuario.click(screen.getByRole('tab', { name: /vitrine/i }))
+
+    expect(screen.getByLabelText(/endereço da vitrine/i)).toHaveValue('minha-loja-top')
+  })
+
+  it('mostra erro no campo slug quando o Supabase retorna duplicidade', async () => {
+    vi.mocked(getLoja).mockResolvedValue(lojaExemplo as never)
+    vi.mocked(updateLoja).mockRejectedValue(new Error('Esse endereço já está em uso, escolha outro.'))
+    const usuario = userEvent.setup()
+
+    renderPagina()
+
+    await screen.findByLabelText(/nome da loja/i)
+    await usuario.click(screen.getByRole('tab', { name: /vitrine/i }))
+    await usuario.type(screen.getByLabelText(/endereço da vitrine/i), 'ja-existe')
+    await usuario.click(screen.getByRole('button', { name: /salvar/i }))
+
+    expect(await screen.findByText('Esse endereço já está em uso, escolha outro.')).toBeInTheDocument()
+  })
 })
