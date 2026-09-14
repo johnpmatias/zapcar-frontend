@@ -1,20 +1,25 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useVeiculos } from '@/hooks/useVeiculos'
-import { deleteVeiculo } from '@/lib/veiculos'
+import { deleteVeiculo, reorderVeiculos, type Veiculo } from '@/lib/veiculos'
 import { Button } from '@/components/ui/button'
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog'
+import { ListaReordenavel } from '@/components/veiculos/ListaReordenavel'
+import { LinhaVeiculo } from '@/components/veiculos/LinhaVeiculo'
+
+const STATUS_REORDENAVEL = ['disponivel', 'reservado']
 
 export default function VeiculosPage() {
   const { veiculos, carregando, erro, recarregar } = useVeiculos()
   const [excluindoId, setExcluindoId] = useState<string | null>(null)
+  const [disponiveis, setDisponiveis] = useState<Veiculo[]>([])
+  const [salvandoOrdem, setSalvandoOrdem] = useState(false)
+  const [erroOrdem, setErroOrdem] = useState<string | null>(null)
+
+  useEffect(() => {
+    setDisponiveis(veiculos.filter((veiculo) => STATUS_REORDENAVEL.includes(veiculo.status)))
+  }, [veiculos])
+
+  const indisponiveis = veiculos.filter((veiculo) => !STATUS_REORDENAVEL.includes(veiculo.status))
 
   async function excluir(idVeiculo: string) {
     setExcluindoId(idVeiculo)
@@ -23,6 +28,30 @@ export default function VeiculosPage() {
       recarregar()
     } finally {
       setExcluindoId(null)
+    }
+  }
+
+  async function aoReordenar(novaLista: Veiculo[]) {
+    const anterior = disponiveis
+    const comNovaOrdem = novaLista.map((veiculo, indice) => ({ ...veiculo, ordem: indice }))
+
+    setErroOrdem(null)
+    setDisponiveis(comNovaOrdem)
+
+    const atualizacoes = comNovaOrdem
+      .filter((veiculo) => anterior.find((v) => v.id === veiculo.id)?.ordem !== veiculo.ordem)
+      .map((veiculo) => ({ id: veiculo.id, ordem: veiculo.ordem }))
+
+    if (atualizacoes.length === 0) return
+
+    setSalvandoOrdem(true)
+    try {
+      await reorderVeiculos(atualizacoes)
+    } catch (e) {
+      setDisponiveis(anterior)
+      setErroOrdem((e as Error).message)
+    } finally {
+      setSalvandoOrdem(false)
     }
   }
 
@@ -51,59 +80,49 @@ export default function VeiculosPage() {
       )}
 
       {!carregando && !erro && veiculos.length > 0 && (
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b text-left text-muted-foreground">
-              <th className="py-2">Marca</th>
-              <th className="py-2">Modelo</th>
-              <th className="py-2">Ano</th>
-              <th className="py-2">Preço</th>
-              <th className="py-2">Status</th>
-              <th className="py-2" />
-            </tr>
-          </thead>
-          <tbody>
-            {veiculos.map((veiculo) => (
-              <tr key={veiculo.id} className="border-b">
-                <td className="py-2">{veiculo.marca}</td>
-                <td className="py-2">{veiculo.modelo}</td>
-                <td className="py-2">{veiculo.ano_modelo}</td>
-                <td className="py-2">
-                  {veiculo.preco.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                </td>
-                <td className="py-2">{veiculo.status}</td>
-                <td className="py-2 text-right">
-                  <Link to={`/veiculos/${veiculo.id}/editar`} className="mr-2 text-sm underline">
-                    Editar
-                  </Link>
-                  <Dialog>
-                    <DialogTrigger render={<Button variant="destructive" size="sm" />}>
-                      Excluir
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Excluir veículo</DialogTitle>
-                      </DialogHeader>
-                      <p className="text-sm text-muted-foreground">
-                        Tem certeza que deseja excluir {veiculo.marca} {veiculo.modelo}? Essa ação não pode ser
-                        desfeita.
-                      </p>
-                      <DialogFooter>
-                        <Button
-                          variant="destructive"
-                          disabled={excluindoId === veiculo.id}
-                          onClick={() => excluir(veiculo.id)}
-                        >
-                          Confirmar exclusão
-                        </Button>
-                      </DialogFooter>
-                    </DialogContent>
-                  </Dialog>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div className="flex flex-col gap-6">
+          <section className="flex flex-col gap-2">
+            <h2 className="text-lg font-semibold">Disponíveis</h2>
+
+            {erroOrdem && (
+              <p role="alert" className="text-sm text-destructive">
+                {erroOrdem}
+              </p>
+            )}
+            {salvandoOrdem && (
+              <p role="status" className="text-sm text-muted-foreground">
+                Salvando ordem...
+              </p>
+            )}
+
+            {disponiveis.length === 0 && (
+              <p className="text-muted-foreground">Nenhum veículo disponível pra reordenar.</p>
+            )}
+
+            {disponiveis.length > 0 && (
+              <ListaReordenavel
+                itens={disponiveis}
+                onReordenar={aoReordenar}
+                renderItem={(veiculo) => (
+                  <LinhaVeiculo veiculo={veiculo} excluindoId={excluindoId} onExcluir={excluir} />
+                )}
+              />
+            )}
+          </section>
+
+          {indisponiveis.length > 0 && (
+            <section className="flex flex-col gap-2">
+              <h2 className="text-lg font-semibold">Vendidos/Inativos</h2>
+              <ul className="flex flex-col gap-2">
+                {indisponiveis.map((veiculo) => (
+                  <li key={veiculo.id} className="flex items-center gap-2 rounded-md border p-2">
+                    <LinhaVeiculo veiculo={veiculo} excluindoId={excluindoId} onExcluir={excluir} />
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+        </div>
       )}
     </div>
   )
