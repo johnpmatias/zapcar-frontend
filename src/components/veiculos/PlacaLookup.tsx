@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { PLACA_REGEX } from '@/lib/veiculo-schema'
 
 interface VersaoFipe {
   texto: string
@@ -70,9 +71,16 @@ export function PlacaLookup({ placaAtual, onDadosEncontrados }: PlacaLookupProps
     setErro(null)
     setDados(null)
     setVersaoSelecionada(null)
+
+    const placaNormalizada = placaAtual.trim().toUpperCase()
+    if (!PLACA_REGEX.test(placaNormalizada)) {
+      setErro(MENSAGENS_ERRO.placa_invalida)
+      return
+    }
+
     setCarregando(true)
     try {
-      const resposta = await fetch(`/api/consulta-placa?placa=${encodeURIComponent(placaAtual)}`)
+      const resposta = await fetch(`/api/consulta-placa?placa=${encodeURIComponent(placaNormalizada)}`)
       const corpo = await resposta.json()
 
       if (!corpo.ok) {

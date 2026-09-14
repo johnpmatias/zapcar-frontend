@@ -23,7 +23,7 @@ export const CARROCERIA_OPTIONS = [
 
 export const STATUS_OPTIONS = ['disponivel', 'reservado', 'vendido', 'inativo'] as const
 
-const PLACA_REGEX = /^[A-Z]{3}[0-9][A-Z0-9][0-9]{2}$/
+export const PLACA_REGEX = /^[A-Z]{3}[0-9][A-Z0-9][0-9]{2}$/
 
 const paraIndefinidoSeVazio = (valor: unknown) =>
   valor === '' || valor === null || valor === undefined ? undefined : valor

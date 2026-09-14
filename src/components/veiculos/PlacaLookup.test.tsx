@@ -65,6 +65,47 @@ describe('PlacaLookup', () => {
     expect(onDadosEncontrados).toHaveBeenCalledWith(expect.objectContaining({ versao: 'Versão B' }))
   })
 
+  it('permite escolher uma versão diferente da pré-selecionada', async () => {
+    vi.mocked(fetch).mockResolvedValue({
+      json: async () => ({
+        ok: true,
+        data: {
+          marca: 'VW',
+          modelo: 'CROSSFOX',
+          anoFabricacao: 2007,
+          anoModelo: 2007,
+          versoes: [
+            { texto: 'Versão B', valorFipe: 22000, score: 95 },
+            { texto: 'Versão A', valorFipe: 20000, score: 80 },
+          ],
+        },
+      }),
+    } as never)
+    const onDadosEncontrados = vi.fn()
+    const usuario = userEvent.setup()
+
+    render(<PlacaLookup placaAtual="INT8C36" onDadosEncontrados={onDadosEncontrados} />)
+    await usuario.click(screen.getByRole('button', { name: /buscar dados/i }))
+    await screen.findByText('Versão A')
+
+    await usuario.click(screen.getByRole('radio', { name: /versão a/i }))
+    await usuario.click(screen.getByRole('button', { name: /usar esta versão/i }))
+
+    expect(onDadosEncontrados).toHaveBeenCalledWith(
+      expect.objectContaining({ versao: 'Versão A', valorFipeReferencia: 20000 })
+    )
+  })
+
+  it('valida o formato da placa localmente antes de chamar a API', async () => {
+    const usuario = userEvent.setup()
+
+    render(<PlacaLookup placaAtual="AB1234" onDadosEncontrados={vi.fn()} />)
+    await usuario.click(screen.getByRole('button', { name: /buscar dados/i }))
+
+    expect(await screen.findByText(/placa inválida/i)).toBeInTheDocument()
+    expect(fetch).not.toHaveBeenCalled()
+  })
+
   it('mostra mensagem quando a placa não é encontrada', async () => {
     vi.mocked(fetch).mockResolvedValue({ json: async () => ({ ok: false, error: 'nao_encontrada' }) } as never)
     const usuario = userEvent.setup()
