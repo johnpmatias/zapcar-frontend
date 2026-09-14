@@ -4,6 +4,7 @@ import LoginPage from '@/pages/Login'
 import SignupPage from '@/pages/Signup'
 import DashboardPage from '@/pages/Dashboard'
 import VeiculosPage from '@/pages/Veiculos'
+import VeiculoFormPage from '@/pages/VeiculoForm'
 
 function App() {
   return (
@@ -23,6 +24,14 @@ function App() {
         element={
           <ProtectedRoute>
             <VeiculosPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/veiculos/novo"
+        element={
+          <ProtectedRoute>
+            <VeiculoFormPage />
           </ProtectedRoute>
         }
       />
