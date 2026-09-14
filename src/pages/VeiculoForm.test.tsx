@@ -66,8 +66,8 @@ describe('VeiculoFormPage — cadastro', () => {
     await usuario.type(screen.getByLabelText(/ano de fabricação/i), '2023')
     await usuario.clear(screen.getByLabelText(/ano do modelo/i))
     await usuario.type(screen.getByLabelText(/ano do modelo/i), '2024')
-    await usuario.clear(screen.getByLabelText(/^preço/i))
-    await usuario.type(screen.getByLabelText(/^preço/i), '95000')
+    await usuario.clear(screen.getByLabelText(/^preço$/i))
+    await usuario.type(screen.getByLabelText(/^preço$/i), '95000')
     await usuario.click(screen.getByRole('button', { name: /salvar/i }))
 
     expect(await screen.findByText(/salvando/i)).toBeInTheDocument()
@@ -97,5 +97,30 @@ describe('VeiculoFormPage — cadastro', () => {
 
     expect(await screen.findByText(/informe a marca/i)).toBeInTheDocument()
     expect(createVeiculo).not.toHaveBeenCalled()
+  })
+
+  it('envia os campos de seleção e o switch de aceita troca', async () => {
+    vi.mocked(createVeiculo).mockResolvedValue({ id: 'novo-id' } as never)
+    const usuario = userEvent.setup()
+
+    renderFormulario()
+
+    await usuario.type(screen.getByLabelText(/marca/i), 'Honda')
+    await usuario.type(screen.getByLabelText(/^modelo/i), 'Civic')
+    await usuario.clear(screen.getByLabelText(/ano de fabricação/i))
+    await usuario.type(screen.getByLabelText(/ano de fabricação/i), '2023')
+    await usuario.clear(screen.getByLabelText(/ano do modelo/i))
+    await usuario.type(screen.getByLabelText(/ano do modelo/i), '2024')
+    await usuario.clear(screen.getByLabelText(/^preço$/i))
+    await usuario.type(screen.getByLabelText(/^preço$/i), '95000')
+    await usuario.click(screen.getByRole('switch', { name: /aceita troca/i }))
+    await usuario.click(screen.getByRole('button', { name: /salvar/i }))
+
+    await waitFor(() =>
+      expect(createVeiculo).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({ aceita_troca: true })
+      )
+    )
   })
 })
