@@ -148,6 +148,8 @@ describe('VeiculoFormPage — edição', () => {
       status: 'disponivel',
       aceita_troca: false,
       destaque: false,
+      fotos: [],
+      foto_capa: null,
     } as never)
     let resolverAtualizacao: (veiculo: unknown) => void = () => {}
     vi.mocked(updateVeiculo).mockReturnValue(

@@ -33,6 +33,7 @@ import {
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
 import { OpcionaisField } from '@/components/veiculos/OpcionaisField'
+import { FotosField } from '@/components/veiculos/FotosField'
 
 const valoresIniciais: z.input<typeof veiculoSchema> = {
   marca: '',
@@ -63,6 +64,8 @@ export default function VeiculoFormPage() {
   const [erroSalvar, setErroSalvar] = useState<string | null>(null)
   const [salvando, setSalvando] = useState(false)
   const [veiculoId] = useState(() => id ?? crypto.randomUUID())
+  const [fotos, setFotos] = useState<string[]>([])
+  const [fotoCapa, setFotoCapa] = useState<string | null>(null)
 
   const form = useForm<z.input<typeof veiculoSchema>, unknown, z.output<typeof veiculoSchema>>({
     resolver: zodResolver(veiculoSchema),
@@ -101,6 +104,8 @@ export default function VeiculoFormPage() {
           opcionais: veiculo.opcionais,
           status: veiculo.status as never,
         })
+        setFotos(veiculo.fotos)
+        setFotoCapa(veiculo.foto_capa)
       })
       .catch((e: Error) => setErroSalvar(e.message))
       .finally(() => setCarregandoVeiculo(false))
@@ -144,8 +149,8 @@ export default function VeiculoFormPage() {
       descricao: valores.descricao ?? null,
       opcionais: valores.opcionais,
       status: valores.status,
-      fotos: [],
-      foto_capa: null,
+      fotos,
+      foto_capa: fotoCapa,
       titulo: gerarTitulo(valores.marca, valores.modelo, valores.ano_modelo),
     }
 
@@ -370,6 +375,17 @@ export default function VeiculoFormPage() {
             <OpcionaisField
               value={form.watch('opcionais') ?? []}
               onChange={(valores) => form.setValue('opcionais', valores)}
+            />
+
+            <FotosField
+              lojaId={user!.id}
+              veiculoId={veiculoId}
+              fotos={fotos}
+              fotoCapa={fotoCapa}
+              onChange={(novasFotos, novaCapa) => {
+                setFotos(novasFotos)
+                setFotoCapa(novaCapa)
+              }}
             />
 
             {erroSalvar && (
