@@ -130,6 +130,36 @@ describe('ConfiguracoesPage', () => {
     expect(updateLoja).not.toHaveBeenCalled()
   })
 
+  it('mostra erro de validação quando a cor primária é inválida e não salva', async () => {
+    vi.mocked(getLoja).mockResolvedValue(lojaExemplo as never)
+    const usuario = userEvent.setup()
+
+    renderPagina()
+
+    await screen.findByLabelText(/nome da loja/i)
+    await usuario.click(screen.getByRole('tab', { name: /aparência/i }))
+    await usuario.type(screen.getByLabelText('Cor primária'), 'não-é-cor')
+    await usuario.click(screen.getByRole('button', { name: /salvar/i }))
+
+    expect(await screen.findByText('Cor inválida. Use o formato #RRGGBB.')).toBeInTheDocument()
+    expect(updateLoja).not.toHaveBeenCalled()
+  })
+
+  it('mostra um aviso genérico quando há erro de validação em uma aba oculta', async () => {
+    vi.mocked(getLoja).mockResolvedValue(lojaExemplo as never)
+    const usuario = userEvent.setup()
+
+    renderPagina()
+
+    const campoNome = await screen.findByLabelText(/nome da loja/i)
+    await usuario.clear(campoNome)
+    await usuario.click(screen.getByRole('tab', { name: /aparência/i }))
+    await usuario.click(screen.getByRole('button', { name: /salvar/i }))
+
+    expect(await screen.findByText(/há campos inválidos — verifique as abas/i)).toBeInTheDocument()
+    expect(updateLoja).not.toHaveBeenCalled()
+  })
+
   it('mostra erro com botão de tentar novamente quando falha ao carregar', async () => {
     vi.mocked(getLoja).mockRejectedValue(new Error('falha de rede'))
 

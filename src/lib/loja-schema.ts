@@ -3,6 +3,7 @@ import { z } from 'zod'
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const SLUG_REGEX = /^[a-z0-9]+(-[a-z0-9]+)*$/
 const COR_REGEX = /^#[0-9a-fA-F]{6}$/
+const URL_REGEX = /^(https?:\/\/)?[^\s]+\.[^\s]+$/
 
 const paraIndefinidoSeVazio = (valor: unknown) =>
   valor === '' || valor === null || valor === undefined ? undefined : valor
@@ -19,6 +20,12 @@ const corOpcional = () =>
   z.preprocess(
     paraIndefinidoSeVazio,
     z.string().trim().regex(COR_REGEX, 'Cor inválida. Use o formato #RRGGBB.').optional()
+  )
+
+const urlOpcional = () =>
+  z.preprocess(
+    paraIndefinidoSeVazio,
+    z.string().trim().regex(URL_REGEX, 'URL inválida.').optional()
   )
 
 const slugOpcional = () =>
@@ -61,10 +68,10 @@ export const lojaSchema = z.object({
   meta_titulo: textoOpcional(),
   meta_descricao: textoOpcional(),
   og_image_url: textoOpcional(),
-  instagram_url: textoOpcional(),
-  facebook_url: textoOpcional(),
-  tiktok_url: textoOpcional(),
-  youtube_url: textoOpcional(),
+  instagram_url: urlOpcional(),
+  facebook_url: urlOpcional(),
+  tiktok_url: urlOpcional(),
+  youtube_url: urlOpcional(),
   meta_pixel_id: textoOpcional(),
   google_tag_id: textoOpcional(),
 })

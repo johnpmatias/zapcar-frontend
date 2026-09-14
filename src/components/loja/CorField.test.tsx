@@ -28,4 +28,10 @@ describe('CorField', () => {
 
     expect(screen.getByLabelText('Cor primária')).toHaveValue('#00ff00')
   })
+
+  it('mostra a mensagem de erro quando a prop error é informada', () => {
+    render(<CorField id="cor" label="Cor primária" value={undefined} onChange={() => {}} error="Cor inválida. Use o formato #RRGGBB." />)
+
+    expect(screen.getByRole('alert')).toHaveTextContent('Cor inválida. Use o formato #RRGGBB.')
+  })
 })

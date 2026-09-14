@@ -24,6 +24,9 @@ export function ImagemField({ lojaId, campo, label, value, onChange }: ImagemFie
     setEnviando(true)
     try {
       const url = await uploadImagemLoja(lojaId, campo, arquivo)
+      if (value) {
+        await removerImagemLoja(value).catch(() => {})
+      }
       onChange(url)
     } catch (e) {
       setErro((e as Error).message)

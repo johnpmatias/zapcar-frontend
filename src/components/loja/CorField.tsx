@@ -6,11 +6,12 @@ interface CorFieldProps {
   label: string
   value: string | undefined
   onChange: (valor: string) => void
+  error?: string
 }
 
 const COR_REGEX = /^#[0-9a-fA-F]{6}$/
 
-export function CorField({ id, label, value, onChange }: CorFieldProps) {
+export function CorField({ id, label, value, onChange, error }: CorFieldProps) {
   return (
     <div className="flex flex-col gap-2">
       <Label htmlFor={id}>{label}</Label>
@@ -24,6 +25,11 @@ export function CorField({ id, label, value, onChange }: CorFieldProps) {
         />
         <Input id={id} value={value ?? ''} onChange={(e) => onChange(e.target.value)} placeholder="#1E40AF" />
       </div>
+      {error && (
+        <p role="alert" className="text-sm text-destructive">
+          {error}
+        </p>
+      )}
     </div>
   )
 }

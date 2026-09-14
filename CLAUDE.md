@@ -57,6 +57,15 @@ O trigger `handle_new_user` cria lojas novas com `vitrine_publica = true` por pa
 alter table public.lojas alter column vitrine_publica set default false;
 ```
 
+## Pendências de back-end já aplicadas
+
+Dois buckets do Supabase Storage precisam existir (criados manualmente via SQL Editor do Supabase — não há migration automática no repo). Ambos usam política RLS "dono gerencia, leitura pública": o dono só mexe nos arquivos sob o prefixo `<auth.uid()>/...` do próprio path, e a leitura é pública (bucket `public: true`).
+
+- `veiculos-fotos` — fotos de veículos do CRUD. SQL completo: `docs/superpowers/plans/2026-09-13-crud-veiculos.md` (Task 10).
+- `lojas-imagens` — logo/banner/imagem de destaque/OG image de Configurações da loja. SQL completo: `docs/superpowers/plans/2026-09-14-configuracoes-loja.md` (seção "Global Constraints").
+
+Se algum upload de imagem falhar com erro de bucket/policy, é provável que um desses dois não tenha sido rodado no ambiente em questão — re-rodar a SQL do documento correspondente.
+
 ## Back-end (referência rápida, fora deste repo)
 
 - Supabase: schema com `lojas`, `leads`, `veiculos`, `agendamentos`, `Interacoes`, `lojas_config_whatsapp`, `lojas_config_ia`, `user_roles`. RLS por `loja_id`/`auth.uid()`. Trigger `handle_new_user` cria `lojas` + `user_roles` + `lojas_config_ia` automaticamente no cadastro (corrigido nesta sessão — antes só criava `lojas`).

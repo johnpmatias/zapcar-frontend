@@ -5,7 +5,7 @@ import type { z } from 'zod'
 import { useAuth } from '@/hooks/useAuth'
 import { useLoja } from '@/hooks/useLoja'
 import { lojaSchema, type LojaFormValues } from '@/lib/loja-schema'
-import { updateLoja, type LojaPayload } from '@/lib/loja'
+import { updateLoja, ERRO_SLUG_DUPLICADO, type LojaPayload } from '@/lib/loja'
 import { gerarSlug } from '@/lib/slug'
 import { CorField } from '@/components/loja/CorField'
 import { ImagemField } from '@/components/loja/ImagemField'
@@ -19,8 +19,6 @@ import {
   TabsTrigger,
   TabsContent,
 } from '@/components/ui/tabs'
-
-const ERRO_SLUG_DUPLICADO = 'Esse endereço já está em uso, escolha outro.'
 
 const valoresIniciais: z.input<typeof lojaSchema> = {
   nome_loja: '',
@@ -67,6 +65,7 @@ export default function ConfiguracoesPage() {
   const [erroSalvar, setErroSalvar] = useState<string | null>(null)
   const [salvando, setSalvando] = useState(false)
   const [salvo, setSalvo] = useState(false)
+  const [temErroDeValidacao, setTemErroDeValidacao] = useState(false)
 
   const form = useForm<z.input<typeof lojaSchema>, unknown, z.output<typeof lojaSchema>>({
     resolver: zodResolver(lojaSchema),
@@ -155,6 +154,7 @@ export default function ConfiguracoesPage() {
   async function onSubmit(valores: LojaFormValues) {
     setErroSalvar(null)
     setSalvo(false)
+    setTemErroDeValidacao(false)
     setSalvando(true)
 
     const payload: LojaPayload = {
@@ -220,7 +220,10 @@ export default function ConfiguracoesPage() {
         </CardHeader>
         <CardContent>
           <form
-            onSubmit={form.handleSubmit(onSubmit, () => setSalvo(false))}
+            onSubmit={form.handleSubmit(onSubmit, () => {
+              setSalvo(false)
+              setTemErroDeValidacao(true)
+            })}
             className="flex flex-col gap-4"
           >
             <Tabs defaultValue="basico">
@@ -345,12 +348,14 @@ export default function ConfiguracoesPage() {
                   label="Cor primária"
                   value={form.watch('cor_primaria') as string | undefined}
                   onChange={(valor) => form.setValue('cor_primaria', valor)}
+                  error={form.formState.errors.cor_primaria?.message}
                 />
                 <CorField
                   id="cor_secundaria"
                   label="Cor secundária"
                   value={form.watch('cor_secundaria') as string | undefined}
                   onChange={(valor) => form.setValue('cor_secundaria', valor)}
+                  error={form.formState.errors.cor_secundaria?.message}
                 />
               </TabsContent>
 
@@ -440,6 +445,11 @@ export default function ConfiguracoesPage() {
             {erroSalvar && (
               <p role="alert" className="text-sm text-destructive">
                 {erroSalvar}
+              </p>
+            )}
+            {temErroDeValidacao && (
+              <p role="alert" className="text-sm text-destructive">
+                Há campos inválidos — verifique as abas.
               </p>
             )}
             {salvo && (

@@ -46,7 +46,7 @@ export interface Loja {
 
 export type LojaPayload = Omit<Loja, 'id' | 'user_id' | 'vitrine_publica' | 'created_at'>
 
-const ERRO_SLUG_DUPLICADO = 'Esse endereço já está em uso, escolha outro.'
+export const ERRO_SLUG_DUPLICADO = 'Esse endereço já está em uso, escolha outro.'
 
 export async function getLoja(userId: string): Promise<Loja | null> {
   const { data, error } = await supabase.from('lojas').select('*').eq('user_id', userId).maybeSingle()

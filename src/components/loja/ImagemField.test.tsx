@@ -43,6 +43,24 @@ describe('ImagemField', () => {
     expect(onChange).not.toHaveBeenCalled()
   })
 
+  it('remove a imagem antiga do Storage ao trocar por uma nova', async () => {
+    vi.mocked(uploadImagemLoja).mockResolvedValue('https://exemplo.com/logo-novo.png')
+    vi.mocked(removerImagemLoja).mockResolvedValue(undefined)
+    const onChange = vi.fn()
+    const usuario = userEvent.setup()
+    const arquivo = new File(['conteudo'], 'logo-novo.png', { type: 'image/png' })
+
+    render(
+      <ImagemField lojaId="loja-1" campo="logo" label="Logo" value="https://exemplo.com/logo-antigo.png" onChange={onChange} />
+    )
+
+    await usuario.upload(screen.getByLabelText('Logo'), arquivo)
+
+    expect(uploadImagemLoja).toHaveBeenCalledWith('loja-1', 'logo', arquivo)
+    expect(removerImagemLoja).toHaveBeenCalledWith('https://exemplo.com/logo-antigo.png')
+    expect(onChange).toHaveBeenCalledWith('https://exemplo.com/logo-novo.png')
+  })
+
   it('remove a imagem existente', async () => {
     vi.mocked(removerImagemLoja).mockResolvedValue(undefined)
     const onChange = vi.fn()

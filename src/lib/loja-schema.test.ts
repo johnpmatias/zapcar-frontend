@@ -54,4 +54,19 @@ describe('lojaSchema', () => {
     const resultado = lojaSchema.safeParse({ ...dadosMinimos, slug: 'auto center!' })
     expect(resultado.success).toBe(false)
   })
+
+  it('rejeita instagram_url em formato inválido', () => {
+    const resultado = lojaSchema.safeParse({ ...dadosMinimos, instagram_url: 'not a url' })
+    expect(resultado.success).toBe(false)
+  })
+
+  it('aceita instagram_url com esquema http(s)', () => {
+    const resultado = lojaSchema.safeParse({ ...dadosMinimos, instagram_url: 'https://instagram.com/lojaX' })
+    expect(resultado.success).toBe(true)
+  })
+
+  it('aceita instagram_url sem esquema http(s)', () => {
+    const resultado = lojaSchema.safeParse({ ...dadosMinimos, instagram_url: 'instagram.com/lojaX' })
+    expect(resultado.success).toBe(true)
+  })
 })
