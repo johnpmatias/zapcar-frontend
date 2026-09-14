@@ -33,6 +33,22 @@ describe('veiculoSchema', () => {
     }
   })
 
+  it('aceita km como string numérica e a converte para número', () => {
+    const resultado = veiculoSchema.safeParse({ ...dadosValidosMinimos, km: '50000' })
+    expect(resultado.success).toBe(true)
+    if (resultado.success) {
+      expect(resultado.data.km).toBe(50000)
+    }
+  })
+
+  it('aceita portas como string numérica e a converte para número', () => {
+    const resultado = veiculoSchema.safeParse({ ...dadosValidosMinimos, portas: '4' })
+    expect(resultado.success).toBe(true)
+    if (resultado.success) {
+      expect(resultado.data.portas).toBe(4)
+    }
+  })
+
   it('rejeita preço promocional maior ou igual ao preço normal', () => {
     const resultado = veiculoSchema.safeParse({
       ...dadosValidosMinimos,

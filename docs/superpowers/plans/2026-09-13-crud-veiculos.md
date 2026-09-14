@@ -263,12 +263,12 @@ export const veiculoSchema = z
       .max(new Date().getFullYear() + 2, 'Ano do modelo inválido.'),
     cor: textoOpcional(),
     km: numeroOpcional(
-      z.number({ invalid_type_error: 'Informe uma quilometragem válida.' }).int().min(0, 'Quilometragem não pode ser negativa.')
+      z.coerce.number({ invalid_type_error: 'Informe uma quilometragem válida.' }).int().min(0, 'Quilometragem não pode ser negativa.')
     ),
     combustivel: z.preprocess(paraIndefinidoSeVazio, z.enum(COMBUSTIVEL_OPTIONS).optional()),
     cambio: z.preprocess(paraIndefinidoSeVazio, z.enum(CAMBIO_OPTIONS).optional()),
     carroceria: z.preprocess(paraIndefinidoSeVazio, z.enum(CARROCERIA_OPTIONS).optional()),
-    portas: numeroOpcional(z.number().int().min(1, 'Número de portas inválido.').max(6, 'Número de portas inválido.')),
+    portas: numeroOpcional(z.coerce.number().int().min(1, 'Número de portas inválido.').max(6, 'Número de portas inválido.')),
     placa: z.preprocess(
       (valor) => {
         const semVazio = paraIndefinidoSeVazio(valor)
@@ -280,7 +280,7 @@ export const veiculoSchema = z
       .number({ invalid_type_error: 'Informe um preço válido.' })
       .positive('O preço deve ser maior que zero.'),
     preco_promocional: numeroOpcional(
-      z.number({ invalid_type_error: 'Informe um preço válido.' }).positive('O preço promocional deve ser maior que zero.')
+      z.coerce.number({ invalid_type_error: 'Informe um preço válido.' }).positive('O preço promocional deve ser maior que zero.')
     ),
     aceita_troca: z.coerce.boolean().default(false),
     destaque: z.coerce.boolean().default(false),
