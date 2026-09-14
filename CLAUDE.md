@@ -51,20 +51,6 @@ O trigger `handle_new_user` cria lojas novas com `vitrine_publica = true` por pa
 alter table public.lojas alter column vitrine_publica set default false;
 ```
 
-O bucket de Storage `veiculos-fotos` e a policy de RLS (Task 10 do CRUD de veículos) ainda não foram rodados no projeto Supabase real — sem isso, upload/remoção de fotos de veículo falha em produção mesmo com o código já pronto e testado (testes usam o storage do Supabase mockado). Rodar no SQL Editor antes de usar essa funcionalidade de verdade:
-
-```sql
-insert into storage.buckets (id, name, public)
-values ('veiculos-fotos', 'veiculos-fotos', true)
-on conflict (id) do nothing;
-
-create policy "Lojista gerencia as próprias fotos"
-on storage.objects for all
-to authenticated
-using (bucket_id = 'veiculos-fotos' and (storage.foldername(name))[1] = auth.uid()::text)
-with check (bucket_id = 'veiculos-fotos' and (storage.foldername(name))[1] = auth.uid()::text);
-```
-
 ## Back-end (referência rápida, fora deste repo)
 
 - Supabase: schema com `lojas`, `leads`, `veiculos`, `agendamentos`, `Interacoes`, `lojas_config_whatsapp`, `lojas_config_ia`, `user_roles`. RLS por `loja_id`/`auth.uid()`. Trigger `handle_new_user` cria `lojas` + `user_roles` + `lojas_config_ia` automaticamente no cadastro (corrigido nesta sessão — antes só criava `lojas`).
