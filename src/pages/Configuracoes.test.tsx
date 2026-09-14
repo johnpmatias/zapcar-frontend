@@ -259,4 +259,23 @@ describe('ConfiguracoesPage', () => {
       expect.objectContaining({ vitrine_destaque_url: 'https://exemplo.com/destaque.png', vitrine_destaque_tipo: 'imagem' })
     )
   })
+
+  it('edita e salva os campos de SEO', async () => {
+    vi.mocked(getLoja).mockResolvedValue(lojaExemplo as never)
+    vi.mocked(updateLoja).mockResolvedValue(lojaExemplo as never)
+    const usuario = userEvent.setup()
+
+    renderPagina()
+
+    await screen.findByLabelText(/nome da loja/i)
+    await usuario.click(screen.getByRole('tab', { name: /seo/i }))
+    await usuario.type(screen.getByLabelText(/título para busca/i), 'Auto Center Silva - Carros seminovos')
+    await usuario.click(screen.getByRole('button', { name: /salvar/i }))
+
+    expect(await screen.findByText(/alterações salvas/i)).toBeInTheDocument()
+    expect(updateLoja).toHaveBeenCalledWith(
+      'user-1',
+      expect.objectContaining({ meta_titulo: 'Auto Center Silva - Carros seminovos' })
+    )
+  })
 })

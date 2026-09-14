@@ -229,6 +229,7 @@ export default function ConfiguracoesPage() {
                 <TabsTrigger value="endereco">Endereço</TabsTrigger>
                 <TabsTrigger value="aparencia">Aparência</TabsTrigger>
                 <TabsTrigger value="vitrine">Vitrine</TabsTrigger>
+                <TabsTrigger value="seo">SEO</TabsTrigger>
               </TabsList>
 
               <TabsContent value="basico" className="flex flex-col gap-4">
@@ -384,6 +385,24 @@ export default function ConfiguracoesPage() {
                   label="Imagem de destaque"
                   value={form.watch('vitrine_destaque_url') as string | undefined}
                   onChange={(url) => form.setValue('vitrine_destaque_url', url)}
+                />
+              </TabsContent>
+
+              <TabsContent value="seo" className="flex flex-col gap-4">
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="meta_titulo">Título para busca</Label>
+                  <Input id="meta_titulo" {...form.register('meta_titulo')} />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="meta_descricao">Descrição para busca</Label>
+                  <Input id="meta_descricao" {...form.register('meta_descricao')} />
+                </div>
+                <ImagemField
+                  lojaId={user!.id}
+                  campo="og-image"
+                  label="Imagem de compartilhamento"
+                  value={form.watch('og_image_url') as string | undefined}
+                  onChange={(url) => form.setValue('og_image_url', url)}
                 />
               </TabsContent>
             </Tabs>
