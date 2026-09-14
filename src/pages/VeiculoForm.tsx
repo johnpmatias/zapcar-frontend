@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import type { z } from 'zod'
 import { useAuth } from '@/hooks/useAuth'
 import { veiculoSchema, type VeiculoFormValues } from '@/lib/veiculo-schema'
 import { gerarTitulo, derivarPlacaFinal } from '@/lib/veiculo-helpers'
@@ -16,7 +17,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 
-const valoresIniciais: VeiculoFormValues = {
+const valoresIniciais: z.input<typeof veiculoSchema> = {
   marca: '',
   modelo: '',
   versao: undefined,
@@ -46,7 +47,7 @@ export default function VeiculoFormPage() {
   const [salvando, setSalvando] = useState(false)
   const [veiculoId] = useState(() => id ?? crypto.randomUUID())
 
-  const form = useForm<VeiculoFormValues>({
+  const form = useForm<z.input<typeof veiculoSchema>, unknown, z.output<typeof veiculoSchema>>({
     resolver: zodResolver(veiculoSchema),
     defaultValues: valoresIniciais,
   })
