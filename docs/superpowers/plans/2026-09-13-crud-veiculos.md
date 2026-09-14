@@ -18,6 +18,8 @@
 - TDD a partir deste sub-projeto: todo arquivo de lógica (`schema`, `lib`, `api`) tem teste escrito antes da implementação.
 - `ano_fabricacao`/`ano_modelo` substituem `ano` (que fica sem uso neste front-end). `user_id` e `ordem` ficam de fora do formulário.
 - Toda mensagem de commit termina com `Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>`.
+- **Zod instalado é v4** (não v3): erros de tipo customizados usam `{ error: '...' }`, não `{ invalid_type_error: '...' }`/`{ required_error: '...' }` (removidos em v4). Schemas com `z.preprocess(...)` têm tipo de *input* diferente do tipo de *output* (`z.infer`) — ao tipar `useForm` do `react-hook-form` com um resolver desses, usar os três genéricos: `useForm<z.input<typeof schema>, unknown, z.output<typeof schema>>(...)`, não só `useForm<TipoDeOutput>(...)`. Esse gap foi descoberto e corrigido durante a Task 6 (afetava também o schema da Task 2) — `npx tsc -b` é o comando que revela isso; `npm test` sozinho não, porque o Vitest transforma TS sem checar tipos.
+- **shadcn `Button`/`DialogTrigger` deste projeto não têm prop `asChild`** (primitivas `@base-ui/react`, não Radix) — usar a prop `render` no lugar (ex.: `<Button render={<Link to="..." />} />`). Descoberto na Task 5.
 
 ---
 
@@ -241,7 +243,7 @@ const PLACA_REGEX = /^[A-Z]{3}[0-9][A-Z0-9][0-9]{2}$/
 const paraIndefinidoSeVazio = (valor: unknown) =>
   valor === '' || valor === null || valor === undefined ? undefined : valor
 
-const numeroOpcional = (schema: z.ZodNumber) =>
+const numeroOpcional = (schema: z.ZodType<number>) =>
   z.preprocess(paraIndefinidoSeVazio, schema.optional())
 
 const textoOpcional = () => z.preprocess(paraIndefinidoSeVazio, z.string().trim().optional())
@@ -252,18 +254,18 @@ export const veiculoSchema = z
     modelo: z.coerce.string().trim().min(1, 'Informe o modelo.'),
     versao: textoOpcional(),
     ano_fabricacao: z.coerce
-      .number({ invalid_type_error: 'Informe um ano válido.' })
+      .number({ error: 'Informe um ano válido.' })
       .int()
       .min(1950, 'Ano de fabricação inválido.')
       .max(new Date().getFullYear() + 1, 'Ano de fabricação inválido.'),
     ano_modelo: z.coerce
-      .number({ invalid_type_error: 'Informe um ano válido.' })
+      .number({ error: 'Informe um ano válido.' })
       .int()
       .min(1950, 'Ano do modelo inválido.')
       .max(new Date().getFullYear() + 2, 'Ano do modelo inválido.'),
     cor: textoOpcional(),
     km: numeroOpcional(
-      z.coerce.number({ invalid_type_error: 'Informe uma quilometragem válida.' }).int().min(0, 'Quilometragem não pode ser negativa.')
+      z.coerce.number({ error: 'Informe uma quilometragem válida.' }).int().min(0, 'Quilometragem não pode ser negativa.')
     ),
     combustivel: z.preprocess(paraIndefinidoSeVazio, z.enum(COMBUSTIVEL_OPTIONS).optional()),
     cambio: z.preprocess(paraIndefinidoSeVazio, z.enum(CAMBIO_OPTIONS).optional()),
@@ -277,10 +279,10 @@ export const veiculoSchema = z
       z.string().regex(PLACA_REGEX, 'Placa inválida. Use o formato AAA0X00 ou AAA9999.').optional()
     ),
     preco: z.coerce
-      .number({ invalid_type_error: 'Informe um preço válido.' })
+      .number({ error: 'Informe um preço válido.' })
       .positive('O preço deve ser maior que zero.'),
     preco_promocional: numeroOpcional(
-      z.coerce.number({ invalid_type_error: 'Informe um preço válido.' }).positive('O preço promocional deve ser maior que zero.')
+      z.coerce.number({ error: 'Informe um preço válido.' }).positive('O preço promocional deve ser maior que zero.')
     ),
     aceita_troca: z.coerce.boolean().default(false),
     destaque: z.coerce.boolean().default(false),
@@ -1017,6 +1019,7 @@ import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
 import { useAuth } from '@/hooks/useAuth'
 import { veiculoSchema, type VeiculoFormValues } from '@/lib/veiculo-schema'
 import { gerarTitulo, derivarPlacaFinal } from '@/lib/veiculo-helpers'
@@ -1061,7 +1064,7 @@ export default function VeiculoFormPage() {
   const [salvando, setSalvando] = useState(false)
   const [veiculoId] = useState(() => id ?? crypto.randomUUID())
 
-  const form = useForm<VeiculoFormValues>({
+  const form = useForm<z.input<typeof veiculoSchema>, unknown, z.output<typeof veiculoSchema>>({
     resolver: zodResolver(veiculoSchema),
     defaultValues: valoresIniciais,
   })
