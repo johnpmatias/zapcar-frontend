@@ -927,6 +927,7 @@ vi.mock('@/lib/veiculos', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@/lib/veiculos')>()),
   createVeiculo: vi.fn(),
   getVeiculo: vi.fn(),
+  updateVeiculo: vi.fn(),
 }))
 
 vi.mock('@/hooks/useAuth', () => ({
@@ -1358,7 +1359,7 @@ Expected: PASS (2 testes)
 
 - [ ] **Step 6: Adicionar os testes dos demais campos no formulário**
 
-Em `src/pages/VeiculoForm.test.tsx`, adicionar ao final do primeiro `it` (antes do `expect(createVeiculo)...`), mais interações, e um novo teste:
+Em `src/pages/VeiculoForm.test.tsx`, adicionar este novo teste dentro do mesmo `describe('VeiculoFormPage — cadastro', ...)` já existente:
 
 ```tsx
   it('envia os campos de seleção e o switch de aceita troca', async () => {
@@ -1664,7 +1665,9 @@ Expected: FAIL (o formulário ainda não carrega dados existentes)
 
 - [ ] **Step 3: Implementar o carregamento e a atualização**
 
-Em `src/pages/VeiculoForm.tsx`, importar `useEffect` de `'react'`, e `getVeiculo`, `updateVeiculo` de `@/lib/veiculos`. Adicionar estado e efeito de carregamento, e ramificar `onSubmit` entre criar/atualizar:
+Em `src/pages/VeiculoForm.tsx`, importar `useEffect` de `'react'`, e `getVeiculo`, `updateVeiculo` de `@/lib/veiculos`. Adicionar estado e efeito de carregamento, e ramificar `onSubmit` entre criar/atualizar.
+
+**Importante:** o bloco de estado/efeito abaixo precisa ficar logo depois de `const form = useForm(...)` e **antes** do `if (!user) { return ... }` — todo hook precisa ser chamado incondicionalmente, antes de qualquer `return` antecipado do componente.
 
 ```tsx
 import { useEffect, useState } from 'react'
@@ -1802,15 +1805,19 @@ Em `src/pages/Veiculos.test.tsx`, importar `deleteVeiculo` no mock de `@/lib/vei
 import userEvent from '@testing-library/user-event'
 ```
 
+Trocar a linha `import { listVeiculos } from '@/lib/veiculos'` por:
+
+```tsx
+import { listVeiculos, deleteVeiculo } from '@/lib/veiculos'
+```
+
+E trocar o bloco `vi.mock('@/lib/veiculos', ...)` por:
+
 ```tsx
 vi.mock('@/lib/veiculos', () => ({
   listVeiculos: vi.fn(),
   deleteVeiculo: vi.fn(),
 }))
-```
-
-```tsx
-import { listVeiculos, deleteVeiculo } from '@/lib/veiculos'
 ```
 
 ```tsx
