@@ -1,6 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { supabase } from '@/lib/supabase'
-import { listVeiculos, getVeiculo, createVeiculo, updateVeiculo, deleteVeiculo, type VeiculoPayload } from '@/lib/veiculos'
+import {
+  listVeiculos,
+  getVeiculo,
+  createVeiculo,
+  updateVeiculo,
+  deleteVeiculo,
+  reorderVeiculos,
+  type VeiculoPayload,
+} from '@/lib/veiculos'
 
 vi.mock('@/lib/supabase', () => ({
   supabase: { from: vi.fn() },
@@ -38,28 +46,76 @@ beforeEach(() => {
 })
 
 describe('listVeiculos', () => {
-  it('retorna os veículos ordenados por criação', async () => {
+  it('ordena por ordem manual, com data de criação como desempate', async () => {
     const builder = {
       select: vi.fn().mockReturnThis(),
-      order: vi.fn().mockResolvedValue({ data: [{ id: '1', ...payloadExemplo }], error: null }),
+      order: vi.fn().mockReturnThis(),
     }
+    builder.order.mockReturnValueOnce(builder).mockResolvedValueOnce({
+      data: [{ id: '1', ...payloadExemplo }],
+      error: null,
+    })
     vi.mocked(supabase.from).mockReturnValue(builder as never)
 
     const resultado = await listVeiculos()
 
     expect(supabase.from).toHaveBeenCalledWith('veiculos')
     expect(builder.select).toHaveBeenCalledWith('*')
+    expect(builder.order).toHaveBeenNthCalledWith(1, 'ordem', { ascending: true })
+    expect(builder.order).toHaveBeenNthCalledWith(2, 'created_at', { ascending: false })
     expect(resultado).toHaveLength(1)
   })
 
   it('lança erro quando o Supabase retorna erro', async () => {
     const builder = {
       select: vi.fn().mockReturnThis(),
-      order: vi.fn().mockResolvedValue({ data: null, error: { message: 'falha de rede' } }),
+      order: vi.fn().mockReturnThis(),
     }
+    builder.order.mockReturnValueOnce(builder).mockResolvedValueOnce({
+      data: null,
+      error: { message: 'falha de rede' },
+    })
     vi.mocked(supabase.from).mockReturnValue(builder as never)
 
     await expect(listVeiculos()).rejects.toThrow('falha de rede')
+  })
+})
+
+describe('reorderVeiculos', () => {
+  it('atualiza a ordem de cada veículo alterado', async () => {
+    const builder = {
+      update: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockResolvedValue({ error: null }),
+    }
+    vi.mocked(supabase.from).mockReturnValue(builder as never)
+
+    await reorderVeiculos([
+      { id: '1', ordem: 0 },
+      { id: '2', ordem: 1 },
+    ])
+
+    expect(builder.update).toHaveBeenNthCalledWith(1, { ordem: 0 })
+    expect(builder.eq).toHaveBeenNthCalledWith(1, 'id', '1')
+    expect(builder.update).toHaveBeenNthCalledWith(2, { ordem: 1 })
+    expect(builder.eq).toHaveBeenNthCalledWith(2, 'id', '2')
+  })
+
+  it('lança erro quando algum update falha', async () => {
+    const builder = {
+      update: vi.fn().mockReturnThis(),
+      eq: vi
+        .fn()
+        .mockResolvedValueOnce({ error: null })
+        .mockResolvedValueOnce({ error: { message: 'falha de rede' } }),
+    }
+    vi.mocked(supabase.from).mockReturnValue(builder as never)
+
+    await expect(
+      reorderVeiculos([
+        { id: '1', ordem: 0 },
+        { id: '2', ordem: 1 },
+      ])
+    ).rejects.toThrow('falha de rede')
   })
 })
 

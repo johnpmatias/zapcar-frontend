@@ -37,10 +37,20 @@ export async function listVeiculos(): Promise<Veiculo[]> {
   const { data, error } = await supabase
     .from('veiculos')
     .select('*')
+    .order('ordem', { ascending: true })
     .order('created_at', { ascending: false })
 
   if (error) throw new Error(error.message)
   return (data ?? []) as Veiculo[]
+}
+
+export async function reorderVeiculos(atualizacoes: { id: string; ordem: number }[]): Promise<void> {
+  const resultados = await Promise.all(
+    atualizacoes.map(({ id, ordem }) => supabase.from('veiculos').update({ ordem }).eq('id', id))
+  )
+
+  const comErro = resultados.find((resultado) => resultado.error)
+  if (comErro?.error) throw new Error(comErro.error.message)
 }
 
 export async function getVeiculo(id: string): Promise<Veiculo | null> {
