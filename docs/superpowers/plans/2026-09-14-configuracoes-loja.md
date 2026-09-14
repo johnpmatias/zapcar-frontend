@@ -678,7 +678,7 @@ Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>"
 
 **Interfaces:**
 - Consumes: `getLoja`, `updateLoja`, `type Loja`, `type LojaPayload` (Task 3); `lojaSchema`, `type LojaFormValues` (Task 2).
-- Produces: hook `useLoja(userId: string | undefined)` retornando `{ loja: Loja | null; carregando: boolean; erro: string | null; recarregar: () => void }`; componente `ConfiguracoesPage` — será estendido nas Tasks 6 a 12 (mesmo arquivo, sem trocar de nome/export). **Já inclui nesta task o `defaultValues`, o mapeamento de `reset()` e o payload de `onSubmit` para os 34 campos do schema** — as tasks seguintes só adicionam os `<Input>`/componentes de UI dos campos que ainda não aparecem na tela; a plumbing de dados não muda mais depois desta task.
+- Produces: hook `useLoja(userId: string | undefined)` retornando `{ loja: Loja | null; carregando: boolean; erro: string | null; recarregar: () => void }`; componente `ConfiguracoesPage` — será estendido nas Tasks 6 a 12 (mesmo arquivo, sem trocar de nome/export). **Já inclui nesta task o `defaultValues`, o mapeamento de `reset()` (36 campos do schema) e o payload de `onSubmit` (37 campos, incluindo `vitrine_destaque_tipo`, derivado e fora do schema)** — as tasks seguintes só adicionam os `<Input>`/componentes de UI dos campos que ainda não aparecem na tela; a plumbing de dados não muda mais depois desta task.
 
 Este task entrega só a aba/seção "Dados básicos" (`nome_loja`, `descricao`, `telefone_contato`, `email_contato`) visível na tela — sem abas ainda (chega na Task 6). O objetivo é ter um ciclo completo de carregar → editar → salvar funcionando de ponta a ponta.
 
