@@ -35,6 +35,14 @@ function App() {
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/veiculos/:id/editar"
+        element={
+          <ProtectedRoute>
+            <VeiculoFormPage />
+          </ProtectedRoute>
+        }
+      />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )

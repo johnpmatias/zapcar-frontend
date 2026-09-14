@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -13,7 +13,7 @@ import {
   STATUS_OPTIONS,
 } from '@/lib/veiculo-schema'
 import { gerarTitulo, derivarPlacaFinal } from '@/lib/veiculo-helpers'
-import { createVeiculo, type VeiculoPayload } from '@/lib/veiculos'
+import { createVeiculo, getVeiculo, updateVeiculo, type VeiculoPayload } from '@/lib/veiculos'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -69,8 +69,53 @@ export default function VeiculoFormPage() {
     defaultValues: valoresIniciais,
   })
 
+  const [carregandoVeiculo, setCarregandoVeiculo] = useState(Boolean(id))
+  const [naoEncontrado, setNaoEncontrado] = useState(false)
+
+  useEffect(() => {
+    if (!id) return
+    getVeiculo(id)
+      .then((veiculo) => {
+        if (!veiculo) {
+          setNaoEncontrado(true)
+          return
+        }
+        form.reset({
+          marca: veiculo.marca,
+          modelo: veiculo.modelo,
+          versao: veiculo.versao ?? undefined,
+          ano_fabricacao: veiculo.ano_fabricacao,
+          ano_modelo: veiculo.ano_modelo,
+          cor: veiculo.cor ?? undefined,
+          km: veiculo.km ?? undefined,
+          combustivel: (veiculo.combustivel as never) ?? undefined,
+          cambio: (veiculo.cambio as never) ?? undefined,
+          carroceria: (veiculo.carroceria as never) ?? undefined,
+          portas: veiculo.portas ?? undefined,
+          placa: veiculo.placa ?? undefined,
+          preco: veiculo.preco,
+          preco_promocional: veiculo.preco_promocional ?? undefined,
+          aceita_troca: veiculo.aceita_troca,
+          destaque: veiculo.destaque,
+          descricao: veiculo.descricao ?? undefined,
+          opcionais: veiculo.opcionais,
+          status: veiculo.status as never,
+        })
+      })
+      .catch((e: Error) => setErroSalvar(e.message))
+      .finally(() => setCarregandoVeiculo(false))
+  }, [id, form])
+
   if (!user) {
     return <p className="text-muted-foreground">Carregando...</p>
+  }
+
+  if (carregandoVeiculo) {
+    return <p className="text-muted-foreground">Carregando...</p>
+  }
+
+  if (naoEncontrado) {
+    return <p className="text-muted-foreground">Veículo não encontrado.</p>
   }
 
   async function onSubmit(valores: VeiculoFormValues) {
@@ -105,7 +150,11 @@ export default function VeiculoFormPage() {
     }
 
     try {
-      await createVeiculo(veiculoId, payload)
+      if (id) {
+        await updateVeiculo(id, payload)
+      } else {
+        await createVeiculo(veiculoId, payload)
+      }
       navigate('/veiculos')
     } catch (e) {
       setErroSalvar((e as Error).message)
@@ -118,7 +167,7 @@ export default function VeiculoFormPage() {
     <div className="mx-auto flex max-w-2xl flex-col gap-4 p-4">
       <Card>
         <CardHeader>
-          <CardTitle>Novo veículo</CardTitle>
+          <CardTitle>{id ? 'Editar veículo' : 'Novo veículo'}</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">

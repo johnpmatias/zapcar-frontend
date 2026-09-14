@@ -3,7 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import VeiculoFormPage from '@/pages/VeiculoForm'
-import { createVeiculo } from '@/lib/veiculos'
+import { createVeiculo, updateVeiculo, getVeiculo } from '@/lib/veiculos'
 import { useAuth } from '@/hooks/useAuth'
 
 vi.mock('@/lib/supabase', () => ({
@@ -122,5 +122,63 @@ describe('VeiculoFormPage — cadastro', () => {
         expect.objectContaining({ aceita_troca: true })
       )
     )
+  })
+})
+
+function renderFormularioEdicao(id: string) {
+  return render(
+    <MemoryRouter initialEntries={[`/veiculos/${id}/editar`]}>
+      <Routes>
+        <Route path="/veiculos/:id/editar" element={<VeiculoFormPage />} />
+      </Routes>
+    </MemoryRouter>
+  )
+}
+
+describe('VeiculoFormPage — edição', () => {
+  it('carrega os dados existentes e envia a atualização', async () => {
+    vi.mocked(getVeiculo).mockResolvedValue({
+      id: 'existente-1',
+      marca: 'Toyota',
+      modelo: 'Corolla',
+      ano_fabricacao: 2022,
+      ano_modelo: 2023,
+      preco: 110000,
+      opcionais: [],
+      status: 'disponivel',
+      aceita_troca: false,
+      destaque: false,
+    } as never)
+    let resolverAtualizacao: (veiculo: unknown) => void = () => {}
+    vi.mocked(updateVeiculo).mockReturnValue(
+      new Promise((resolve) => {
+        resolverAtualizacao = resolve
+      }) as never
+    )
+    const usuario = userEvent.setup()
+
+    renderFormularioEdicao('existente-1')
+
+    expect(await screen.findByDisplayValue('Toyota')).toBeInTheDocument()
+
+    await usuario.clear(screen.getByLabelText(/^preço$/i))
+    await usuario.type(screen.getByLabelText(/^preço$/i), '108000')
+    await usuario.click(screen.getByRole('button', { name: /salvar/i }))
+
+    expect(await screen.findByText(/salvando/i)).toBeInTheDocument()
+    expect(updateVeiculo).toHaveBeenCalledWith(
+      'existente-1',
+      expect.objectContaining({ preco: 108000, marca: 'Toyota' })
+    )
+
+    resolverAtualizacao({ id: 'existente-1' })
+  })
+
+  it('mostra mensagem quando o veículo não é encontrado', async () => {
+    vi.mocked(getVeiculo).mockResolvedValue(null)
+
+    renderFormularioEdicao('inexistente')
+
+    expect(await screen.findByText(/veículo não encontrado/i)).toBeInTheDocument()
   })
 })
