@@ -23,13 +23,16 @@ Plano de implementação do CRUD de veículos: `docs/superpowers/plans/2026-09-1
 Spec de Configurações da loja: `docs/superpowers/specs/2026-09-14-configuracoes-loja-design.md`
 Plano de implementação de Configurações da loja: `docs/superpowers/plans/2026-09-14-configuracoes-loja.md`
 
+Spec de Reordenação manual dos veículos: `docs/superpowers/specs/2026-09-14-reordenacao-veiculos-design.md`
+Plano de implementação de Reordenação manual dos veículos: `docs/superpowers/plans/2026-09-14-reordenacao-veiculos.md`
+
 ## Roteiro — próximos sub-projetos (nesta ordem)
 
 1. ~~Fundação~~ ✅ completo
 2. ~~CRUD de veículos~~ ✅ completo
 3. **Vitrine pública com CTA de WhatsApp** (`/v/:slug`) — dividido em três sub-projetos menores, cada um com spec+plano+implementação próprios:
    - 3a. ~~Configurações da loja~~ ✅ completo.
-   - 3b. Reordenação manual dos veículos (`ordem`) — drag-and-drop em `/veiculos`, adiada do CRUD de veículos.
+   - 3b. ~~Reordenação manual dos veículos~~ ✅ completo.
    - 3c. Vitrine pública (`/v/:slug`) propriamente dita — consome os dados de 3a e a ordem de 3b, com CTA de WhatsApp por veículo.
 4. Dashboard CRM (histórico de conversa, temperatura do lead, assumir conversa manualmente).
 5. Billing (Stripe) + landing page.
