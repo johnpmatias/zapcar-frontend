@@ -34,6 +34,7 @@ import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
 import { OpcionaisField } from '@/components/veiculos/OpcionaisField'
 import { FotosField } from '@/components/veiculos/FotosField'
+import { PlacaLookup } from '@/components/veiculos/PlacaLookup'
 
 const valoresIniciais: z.input<typeof veiculoSchema> = {
   marca: '',
@@ -66,6 +67,7 @@ export default function VeiculoFormPage() {
   const [veiculoId] = useState(() => id ?? crypto.randomUUID())
   const [fotos, setFotos] = useState<string[]>([])
   const [fotoCapa, setFotoCapa] = useState<string | null>(null)
+  const [valorFipeReferencia, setValorFipeReferencia] = useState<number | null>(null)
 
   const form = useForm<z.input<typeof veiculoSchema>, unknown, z.output<typeof veiculoSchema>>({
     resolver: zodResolver(veiculoSchema),
@@ -219,6 +221,19 @@ export default function VeiculoFormPage() {
             <div className="flex flex-col gap-2">
               <Label htmlFor="preco">Preço</Label>
               <Input id="preco" type="number" step="0.01" {...form.register('preco')} />
+              {valorFipeReferencia !== null && (
+                <p className="text-sm text-muted-foreground">
+                  Valor Fipe de referência:{' '}
+                  {valorFipeReferencia.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} —{' '}
+                  <button
+                    type="button"
+                    className="underline"
+                    onClick={() => form.setValue('preco', valorFipeReferencia)}
+                  >
+                    usar como preço
+                  </button>
+                </p>
+              )}
               {form.formState.errors.preco && (
                 <p role="alert" className="text-sm text-destructive">
                   {form.formState.errors.preco.message}
@@ -317,6 +332,29 @@ export default function VeiculoFormPage() {
                 </p>
               )}
             </div>
+
+            <PlacaLookup
+              placaAtual={(form.watch('placa') as string | undefined) ?? ''}
+              onDadosEncontrados={(dados) => {
+                form.setValue('marca', dados.marca)
+                form.setValue('modelo', dados.modelo)
+                form.setValue('ano_fabricacao', dados.anoFabricacao)
+                form.setValue('ano_modelo', dados.anoModelo)
+                if (dados.cor) form.setValue('cor', dados.cor)
+                if (dados.combustivel) form.setValue('combustivel', dados.combustivel as never)
+                // cambio/carroceria vêm em texto livre da API de placas (nem sempre presentes) —
+                // só aplica se bater exatamente com uma das opções do select, senão fica em branco
+                // pro lojista escolher manualmente.
+                if (dados.cambio && (CAMBIO_OPTIONS as readonly string[]).includes(dados.cambio)) {
+                  form.setValue('cambio', dados.cambio as never)
+                }
+                if (dados.carroceria && (CARROCERIA_OPTIONS as readonly string[]).includes(dados.carroceria)) {
+                  form.setValue('carroceria', dados.carroceria as never)
+                }
+                if (dados.versao) form.setValue('versao', dados.versao)
+                setValorFipeReferencia(dados.valorFipeReferencia ?? null)
+              }}
+            />
 
             <div className="flex flex-col gap-2">
               <Label htmlFor="preco_promocional">Preço promocional</Label>
