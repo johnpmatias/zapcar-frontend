@@ -10,6 +10,12 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  TabsContent,
+} from '@/components/ui/tabs'
 
 const ERRO_SLUG_DUPLICADO = 'Esse endereço já está em uso, escolha outro.'
 
@@ -199,35 +205,104 @@ export default function ConfiguracoesPage() {
             onSubmit={form.handleSubmit(onSubmit, () => setSalvo(false))}
             className="flex flex-col gap-4"
           >
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="nome_loja">Nome da loja</Label>
-              <Input id="nome_loja" {...form.register('nome_loja')} />
-              {form.formState.errors.nome_loja && (
-                <p role="alert" className="text-sm text-destructive">
-                  {form.formState.errors.nome_loja.message}
-                </p>
-              )}
-            </div>
+            <Tabs defaultValue="basico">
+              <TabsList>
+                <TabsTrigger value="basico">Dados básicos</TabsTrigger>
+                <TabsTrigger value="endereco">Endereço</TabsTrigger>
+              </TabsList>
 
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="descricao">Descrição</Label>
-              <Input id="descricao" {...form.register('descricao')} />
-            </div>
+              <TabsContent value="basico" className="flex flex-col gap-4">
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="nome_loja">Nome da loja</Label>
+                  <Input id="nome_loja" {...form.register('nome_loja')} />
+                  {form.formState.errors.nome_loja && (
+                    <p role="alert" className="text-sm text-destructive">
+                      {form.formState.errors.nome_loja.message}
+                    </p>
+                  )}
+                </div>
 
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="telefone_contato">Telefone / WhatsApp</Label>
-              <Input id="telefone_contato" {...form.register('telefone_contato')} />
-            </div>
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="descricao">Descrição</Label>
+                  <Input id="descricao" {...form.register('descricao')} />
+                </div>
 
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="email_contato">E-mail de contato</Label>
-              <Input id="email_contato" {...form.register('email_contato')} />
-              {form.formState.errors.email_contato && (
-                <p role="alert" className="text-sm text-destructive">
-                  {form.formState.errors.email_contato.message}
-                </p>
-              )}
-            </div>
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="telefone_contato">Telefone / WhatsApp</Label>
+                  <Input id="telefone_contato" {...form.register('telefone_contato')} />
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="email_contato">E-mail de contato</Label>
+                  <Input id="email_contato" {...form.register('email_contato')} />
+                  {form.formState.errors.email_contato && (
+                    <p role="alert" className="text-sm text-destructive">
+                      {form.formState.errors.email_contato.message}
+                    </p>
+                  )}
+                </div>
+              </TabsContent>
+
+              <TabsContent value="endereco" className="flex flex-col gap-4">
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="logradouro">Logradouro</Label>
+                  <Input id="logradouro" {...form.register('logradouro')} />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="numero">Número</Label>
+                  <Input id="numero" {...form.register('numero')} />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="bairro">Bairro</Label>
+                  <Input id="bairro" {...form.register('bairro')} />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="cidade">Cidade</Label>
+                  <Input id="cidade" {...form.register('cidade')} />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="estado">Estado</Label>
+                  <Input id="estado" {...form.register('estado')} />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="cep">CEP</Label>
+                  <Input id="cep" {...form.register('cep')} />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="google_maps_link">Link do Google Maps</Label>
+                  <Input id="google_maps_link" {...form.register('google_maps_link')} />
+                </div>
+
+                <p className="text-sm font-medium">Horário de funcionamento</p>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="flex flex-col gap-2">
+                    <Label htmlFor="horario_semana_abertura">Seg-sex, abertura</Label>
+                    <Input id="horario_semana_abertura" type="time" {...form.register('horario_semana_abertura')} />
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <Label htmlFor="horario_semana_fechamento">Seg-sex, fechamento</Label>
+                    <Input id="horario_semana_fechamento" type="time" {...form.register('horario_semana_fechamento')} />
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <Label htmlFor="horario_sabado_abertura">Sábado, abertura</Label>
+                    <Input id="horario_sabado_abertura" type="time" {...form.register('horario_sabado_abertura')} />
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <Label htmlFor="horario_sabado_fechamento">Sábado, fechamento</Label>
+                    <Input id="horario_sabado_fechamento" type="time" {...form.register('horario_sabado_fechamento')} />
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <Label htmlFor="horario_domingo_abertura">Domingo, abertura</Label>
+                    <Input id="horario_domingo_abertura" type="time" {...form.register('horario_domingo_abertura')} />
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <Label htmlFor="horario_domingo_fechamento">Domingo, fechamento</Label>
+                    <Input id="horario_domingo_fechamento" type="time" {...form.register('horario_domingo_fechamento')} />
+                  </div>
+                </div>
+                <p className="text-sm text-muted-foreground">Deixe os dois campos de um dia em branco se a loja não abre nesse dia.</p>
+              </TabsContent>
+            </Tabs>
 
             {erroSalvar && (
               <p role="alert" className="text-sm text-destructive">

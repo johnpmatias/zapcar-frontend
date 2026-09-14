@@ -133,4 +133,20 @@ describe('ConfiguracoesPage', () => {
     expect(await screen.findByText('falha de rede')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /tentar novamente/i })).toBeInTheDocument()
   })
+
+  it('edita e salva um campo de endereço na aba Endereço', async () => {
+    vi.mocked(getLoja).mockResolvedValue(lojaExemplo as never)
+    vi.mocked(updateLoja).mockResolvedValue(lojaExemplo as never)
+    const usuario = userEvent.setup()
+
+    renderPagina()
+
+    await screen.findByLabelText(/nome da loja/i)
+    await usuario.click(screen.getByRole('tab', { name: /endereço/i }))
+    await usuario.type(screen.getByLabelText(/^cidade$/i), 'São Paulo')
+    await usuario.click(screen.getByRole('button', { name: /salvar/i }))
+
+    expect(await screen.findByText(/alterações salvas/i)).toBeInTheDocument()
+    expect(updateLoja).toHaveBeenCalledWith('user-1', expect.objectContaining({ cidade: 'São Paulo' }))
+  })
 })
