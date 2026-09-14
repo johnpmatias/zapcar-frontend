@@ -27,10 +27,20 @@ Front-end da "Fundação" do ZapCar: React + Vite + TypeScript + Tailwind + shad
    npm run dev
    ```
 
+## Variável de ambiente adicional (Vercel)
+
+A busca de dados por placa (`api/consulta-placa.ts`) depende de `APIPLACAS_TOKEN`, configurada em Settings → Environment Variables do projeto na Vercel — **nunca** como `VITE_*` nem commitada no repositório.
+
 ## Build
 
 ```bash
 npm run build
+```
+
+## Testes
+
+```bash
+npm test
 ```
 
 ## Deploy

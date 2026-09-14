@@ -17,11 +17,14 @@ O sub-projeto **"Fundação"** está completo e no ar:
 Spec: `docs/superpowers/specs/2026-09-13-fundacao-painel-design.md`
 Plano de implementação (executado, 8 tasks + revisão final, todas completas): `docs/superpowers/plans/2026-09-13-fundacao-painel.md`
 
+Spec do CRUD de veículos: `docs/superpowers/specs/2026-09-13-crud-veiculos-design.md`
+Plano de implementação do CRUD de veículos: `docs/superpowers/plans/2026-09-13-crud-veiculos.md`
+
 ## Roteiro — próximos sub-projetos (nesta ordem)
 
 1. ~~Fundação~~ ✅ completo
-2. **CRUD de veículos** — próximo. Listar e cadastrar carros (tabela `veiculos`, já usada pelo agente de IA no back-end).
-3. Vitrine pública com CTA de WhatsApp (`/v/:slug`).
+2. ~~CRUD de veículos~~ ✅ completo
+3. **Vitrine pública com CTA de WhatsApp** (`/v/:slug`) — próximo. Inclui a tarefa de reordenação manual dos veículos (`ordem`), adiada do CRUD de veículos.
 4. Dashboard CRM (histórico de conversa, temperatura do lead, assumir conversa manualmente).
 5. Billing (Stripe) + landing page.
 
