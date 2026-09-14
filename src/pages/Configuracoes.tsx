@@ -378,6 +378,13 @@ export default function ConfiguracoesPage() {
                   <Label htmlFor="vitrine_cta_destino">Link do botão de destaque</Label>
                   <Input id="vitrine_cta_destino" {...form.register('vitrine_cta_destino')} />
                 </div>
+                <ImagemField
+                  lojaId={user!.id}
+                  campo="destaque"
+                  label="Imagem de destaque"
+                  value={form.watch('vitrine_destaque_url') as string | undefined}
+                  onChange={(url) => form.setValue('vitrine_destaque_url', url)}
+                />
               </TabsContent>
             </Tabs>
 

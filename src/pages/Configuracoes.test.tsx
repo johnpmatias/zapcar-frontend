@@ -237,4 +237,26 @@ describe('ConfiguracoesPage', () => {
 
     expect(await screen.findByText('Esse endereço já está em uso, escolha outro.')).toBeInTheDocument()
   })
+
+  it('sobe a imagem de destaque da vitrine e grava o tipo como imagem', async () => {
+    const { uploadImagemLoja } = await import('@/lib/loja-imagens')
+    vi.mocked(uploadImagemLoja).mockResolvedValue('https://exemplo.com/destaque.png')
+    vi.mocked(getLoja).mockResolvedValue(lojaExemplo as never)
+    vi.mocked(updateLoja).mockResolvedValue(lojaExemplo as never)
+    const usuario = userEvent.setup()
+    const arquivo = new File(['conteudo'], 'destaque.png', { type: 'image/png' })
+
+    renderPagina()
+
+    await screen.findByLabelText(/nome da loja/i)
+    await usuario.click(screen.getByRole('tab', { name: /vitrine/i }))
+    await usuario.upload(screen.getByLabelText(/imagem de destaque/i), arquivo)
+    await usuario.click(screen.getByRole('button', { name: /salvar/i }))
+
+    expect(await screen.findByText(/alterações salvas/i)).toBeInTheDocument()
+    expect(updateLoja).toHaveBeenCalledWith(
+      'user-1',
+      expect.objectContaining({ vitrine_destaque_url: 'https://exemplo.com/destaque.png', vitrine_destaque_tipo: 'imagem' })
+    )
+  })
 })
