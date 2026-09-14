@@ -84,7 +84,8 @@ describe('VeiculosPage', () => {
 
     renderPagina()
 
-    expect(await screen.findByText('falha de rede')).toBeInTheDocument()
+    const alerta = await screen.findByRole('alert')
+    expect(alerta).toHaveTextContent('falha de rede')
     expect(screen.getByRole('button', { name: /tentar novamente/i })).toBeInTheDocument()
   })
 
@@ -111,9 +112,6 @@ describe('VeiculosPage', () => {
 
     renderPagina()
 
-    // Espera pelo conteúdo da seção "Disponíveis" (não só pelo título dela):
-    // ele só aparece depois que o efeito que separa `veiculos` em
-    // `disponiveis` roda, um instante depois do título já estar na tela.
     expect(await screen.findByText('Honda')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: /disponíveis/i })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: /vendidos\/inativos/i })).toBeInTheDocument()
@@ -141,13 +139,23 @@ describe('VeiculosPage', () => {
     expect(await screen.findByText(/nenhum veículo disponível pra reordenar/i)).toBeInTheDocument()
   })
 
-  it('reordena via teclado e persiste a nova ordem', async () => {
+  it('reordena via teclado, mostra "Salvando ordem..." durante o salvamento e persiste a nova ordem', async () => {
     mockarRetangulos()
     vi.mocked(listVeiculos).mockResolvedValue([
       { id: '1', marca: 'Honda', modelo: 'Civic', ano_modelo: 2024, preco: 95000, status: 'disponivel', ordem: 0 } as never,
       { id: '2', marca: 'Toyota', modelo: 'Corolla', ano_modelo: 2022, preco: 90000, status: 'disponivel', ordem: 1 } as never,
     ])
-    vi.mocked(reorderVeiculos).mockResolvedValue(undefined)
+    // Promise controlada manualmente (em vez de mockResolvedValue) pra poder
+    // observar de forma determinística o indicador "Salvando ordem..." tanto
+    // presente (enquanto pendente) quanto ausente (depois de resolvida), sem
+    // depender de timing de uma promise que já nasce resolvida.
+    let resolverReorder: () => void = () => {}
+    vi.mocked(reorderVeiculos).mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolverReorder = () => resolve(undefined)
+        })
+    )
 
     renderPagina()
     await screen.findByText('Honda')
@@ -166,9 +174,22 @@ describe('VeiculosPage', () => {
         { id: '1', ordem: 1 },
       ])
     )
+
+    // dnd-kit também expõe sua própria região role="status" (live region de
+    // anúncios de drag-and-drop, sem nome acessível calculável a partir do
+    // conteúdo) — por isso filtra os elementos com essa role pelo texto do
+    // indicador da página em vez de usar a opção `name`.
+    const indicadorSalvando = () =>
+      screen.queryAllByRole('status').filter((el) => /salvando ordem/i.test(el.textContent ?? ''))
+
+    expect(indicadorSalvando()).toHaveLength(1)
+
+    resolverReorder()
+
+    await waitFor(() => expect(indicadorSalvando()).toHaveLength(0))
   })
 
-  it('reverte a ordem e mostra erro quando falha ao salvar', async () => {
+  it('mostra erro e re-sincroniza com a ordem real do servidor quando falha ao salvar', async () => {
     mockarRetangulos()
     vi.mocked(listVeiculos).mockResolvedValue([
       { id: '1', marca: 'Honda', modelo: 'Civic', ano_modelo: 2024, preco: 95000, status: 'disponivel', ordem: 0 } as never,
@@ -187,9 +208,15 @@ describe('VeiculosPage', () => {
     fireEvent.keyDown(alcaPrimeiro, { code: 'ArrowDown' })
     fireEvent.keyDown(alcaPrimeiro, { code: 'Space' })
 
-    expect(await screen.findByText('falha de rede')).toBeInTheDocument()
+    const alerta = await screen.findByRole('alert')
+    expect(alerta).toHaveTextContent('falha de rede')
 
-    const linhas = screen.getAllByRole('listitem')
+    // reorderVeiculos falhou no meio do Promise.all; em vez de confiar no
+    // estado pré-drag, o componente busca a ordem real no servidor
+    // (listVeiculos, aqui ainda mockado com a ordem original) e é essa
+    // busca — não uma reversão local cega — que explica a lista voltar a
+    // Honda/Toyota.
+    const linhas = await screen.findAllByRole('listitem')
     expect(linhas[0].textContent).toContain('Honda')
     expect(linhas[1].textContent).toContain('Toyota')
   })

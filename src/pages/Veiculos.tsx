@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useVeiculos } from '@/hooks/useVeiculos'
-import { deleteVeiculo, reorderVeiculos, type Veiculo } from '@/lib/veiculos'
+import { deleteVeiculo, listVeiculos, reorderVeiculos, type Veiculo } from '@/lib/veiculos'
 import { Button } from '@/components/ui/button'
 import { ListaReordenavel } from '@/components/veiculos/ListaReordenavel'
 import { LinhaVeiculo } from '@/components/veiculos/LinhaVeiculo'
@@ -11,14 +11,26 @@ const STATUS_REORDENAVEL = ['disponivel', 'reservado']
 export default function VeiculosPage() {
   const { veiculos, carregando, erro, recarregar } = useVeiculos()
   const [excluindoId, setExcluindoId] = useState<string | null>(null)
-  const [disponiveis, setDisponiveis] = useState<Veiculo[]>([])
+  const [ordemOtimista, setOrdemOtimista] = useState<Veiculo[] | null>(null)
   const [salvandoOrdem, setSalvandoOrdem] = useState(false)
   const [erroOrdem, setErroOrdem] = useState<string | null>(null)
 
-  useEffect(() => {
-    setDisponiveis(veiculos.filter((veiculo) => STATUS_REORDENAVEL.includes(veiculo.status)))
-  }, [veiculos])
+  // Sempre que `veiculos` mudar de identidade (nova carga do servidor),
+  // descarta qualquer override otimista — ele só existe entre um drag e a
+  // confirmação/re-sincronização daquela operação específica. Ajustado
+  // durante a renderização (padrão documentado do React pra "resetar
+  // estado quando algo muda"), não num efeito: React descarta a renderização
+  // em andamento e refaz na hora com o novo estado, então nunca chega a
+  // pintar um frame com o override desatualizado — e evita o aviso de lint
+  // de setState dentro de efeito.
+  const [veiculosAnteriores, setVeiculosAnteriores] = useState(veiculos)
+  if (veiculos !== veiculosAnteriores) {
+    setVeiculosAnteriores(veiculos)
+    setOrdemOtimista(null)
+  }
 
+  const disponiveis =
+    ordemOtimista ?? veiculos.filter((veiculo) => STATUS_REORDENAVEL.includes(veiculo.status))
   const indisponiveis = veiculos.filter((veiculo) => !STATUS_REORDENAVEL.includes(veiculo.status))
 
   async function excluir(idVeiculo: string) {
@@ -36,7 +48,7 @@ export default function VeiculosPage() {
     const comNovaOrdem = novaLista.map((veiculo, indice) => ({ ...veiculo, ordem: indice }))
 
     setErroOrdem(null)
-    setDisponiveis(comNovaOrdem)
+    setOrdemOtimista(comNovaOrdem)
 
     const atualizacoes = comNovaOrdem
       .filter((veiculo) => anterior.find((v) => v.id === veiculo.id)?.ordem !== veiculo.ordem)
@@ -48,8 +60,18 @@ export default function VeiculosPage() {
     try {
       await reorderVeiculos(atualizacoes)
     } catch (e) {
-      setDisponiveis(anterior)
       setErroOrdem((e as Error).message)
+      // reorderVeiculos dispara N updates independentes via Promise.all e pode
+      // falhar no meio — a lista pode ter ficado parcialmente reordenada no
+      // banco. Em vez de assumir que `anterior` (o estado pré-drag) ainda é
+      // verdade, busca a ordem real no servidor pra refletir na tela.
+      try {
+        const atuais = await listVeiculos()
+        setOrdemOtimista(atuais.filter((veiculo) => STATUS_REORDENAVEL.includes(veiculo.status)))
+      } catch {
+        // A re-busca falhou também: mantém o override otimista atual (pode
+        // não bater 100% com o servidor, mas não há como saber mais agora).
+      }
     } finally {
       setSalvandoOrdem(false)
     }
