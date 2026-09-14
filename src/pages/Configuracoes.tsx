@@ -7,6 +7,7 @@ import { useLoja } from '@/hooks/useLoja'
 import { lojaSchema, type LojaFormValues } from '@/lib/loja-schema'
 import { updateLoja, type LojaPayload } from '@/lib/loja'
 import { CorField } from '@/components/loja/CorField'
+import { ImagemField } from '@/components/loja/ImagemField'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -306,6 +307,20 @@ export default function ConfiguracoesPage() {
               </TabsContent>
 
               <TabsContent value="aparencia" className="flex flex-col gap-4">
+                <ImagemField
+                  lojaId={user!.id}
+                  campo="logo"
+                  label="Logo"
+                  value={form.watch('logo_url') as string | undefined}
+                  onChange={(url) => form.setValue('logo_url', url)}
+                />
+                <ImagemField
+                  lojaId={user!.id}
+                  campo="banner"
+                  label="Banner"
+                  value={form.watch('banner_url') as string | undefined}
+                  onChange={(url) => form.setValue('banner_url', url)}
+                />
                 <CorField
                   id="cor_primaria"
                   label="Cor primária"

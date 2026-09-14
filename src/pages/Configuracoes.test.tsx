@@ -20,6 +20,11 @@ vi.mock('@/hooks/useAuth', () => ({
   useAuth: vi.fn(),
 }))
 
+vi.mock('@/lib/loja-imagens', () => ({
+  uploadImagemLoja: vi.fn(),
+  removerImagemLoja: vi.fn(),
+}))
+
 const lojaExemplo = {
   id: 'user-1',
   user_id: 'user-1',
@@ -164,5 +169,27 @@ describe('ConfiguracoesPage', () => {
 
     expect(await screen.findByText(/alterações salvas/i)).toBeInTheDocument()
     expect(updateLoja).toHaveBeenCalledWith('user-1', expect.objectContaining({ cor_primaria: '#112233' }))
+  })
+
+  it('sobe a logo e envia a URL ao salvar', async () => {
+    const { uploadImagemLoja } = await import('@/lib/loja-imagens')
+    vi.mocked(uploadImagemLoja).mockResolvedValue('https://exemplo.com/logo.png')
+    vi.mocked(getLoja).mockResolvedValue(lojaExemplo as never)
+    vi.mocked(updateLoja).mockResolvedValue(lojaExemplo as never)
+    const usuario = userEvent.setup()
+    const arquivo = new File(['conteudo'], 'logo.png', { type: 'image/png' })
+
+    renderPagina()
+
+    await screen.findByLabelText(/nome da loja/i)
+    await usuario.click(screen.getByRole('tab', { name: /aparência/i }))
+    await usuario.upload(screen.getByLabelText('Logo'), arquivo)
+    await usuario.click(screen.getByRole('button', { name: /salvar/i }))
+
+    expect(await screen.findByText(/alterações salvas/i)).toBeInTheDocument()
+    expect(updateLoja).toHaveBeenCalledWith(
+      'user-1',
+      expect.objectContaining({ logo_url: 'https://exemplo.com/logo.png' })
+    )
   })
 })
