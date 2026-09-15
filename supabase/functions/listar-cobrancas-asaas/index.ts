@@ -1,6 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.116.0'
 
-const ASAAS_API_URL = Deno.env.get('ASAAS_API_URL') ?? 'https://api-sandbox.asaas.com/v3'
+const ASAAS_API_URL = Deno.env.get('ASAAS_API_URL')!
 const ASAAS_API_KEY = Deno.env.get('ASAAS_API_KEY')!
 
 const corsHeaders = {
@@ -21,7 +21,10 @@ Deno.serve(async (req) => {
   try {
     const authHeader = req.headers.get('Authorization')
     if (!authHeader) {
-      return new Response(JSON.stringify({ error: 'Não autenticado.' }), { status: 401, headers: corsHeaders })
+      return new Response(JSON.stringify({ error: 'Não autenticado.' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
     }
 
     const supabase = createClient(
@@ -31,7 +34,10 @@ Deno.serve(async (req) => {
 
     const { data: userData, error: userError } = await supabase.auth.getUser(authHeader.replace('Bearer ', ''))
     if (userError || !userData.user) {
-      return new Response(JSON.stringify({ error: 'Não autenticado.' }), { status: 401, headers: corsHeaders })
+      return new Response(JSON.stringify({ error: 'Não autenticado.' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
     }
 
     const { data: loja } = await supabase
@@ -53,8 +59,8 @@ Deno.serve(async (req) => {
 
     if (!cobrancasResposta.ok) {
       return new Response(JSON.stringify({ error: 'Erro ao consultar cobranças no Asaas.' }), {
-        status: 502,
-        headers: corsHeaders,
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
 
@@ -71,6 +77,9 @@ Deno.serve(async (req) => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   } catch (e) {
-    return new Response(JSON.stringify({ error: (e as Error).message }), { status: 500, headers: corsHeaders })
+    return new Response(JSON.stringify({ error: (e as Error).message }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    })
   }
 })
