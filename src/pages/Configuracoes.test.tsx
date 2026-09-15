@@ -66,6 +66,10 @@ const lojaExemplo = {
   youtube_url: null,
   meta_pixel_id: null,
   google_tag_id: null,
+  subscription_status: 'active' as const,
+  trial_ends_at: '2026-01-08T00:00:00Z',
+  asaas_customer_id: null,
+  asaas_subscription_id: null,
   created_at: '2026-01-01T00:00:00Z',
 }
 

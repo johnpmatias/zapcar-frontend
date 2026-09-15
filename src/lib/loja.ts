@@ -41,10 +41,23 @@ export interface Loja {
   youtube_url: string | null
   meta_pixel_id: string | null
   google_tag_id: string | null
+  subscription_status: 'trial' | 'active' | 'overdue' | 'canceled'
+  trial_ends_at: string
+  asaas_customer_id: string | null
+  asaas_subscription_id: string | null
   created_at: string
 }
 
-export type LojaPayload = Omit<Loja, 'id' | 'user_id' | 'created_at'>
+export type LojaPayload = Omit<
+  Loja,
+  | 'id'
+  | 'user_id'
+  | 'created_at'
+  | 'subscription_status'
+  | 'trial_ends_at'
+  | 'asaas_customer_id'
+  | 'asaas_subscription_id'
+>
 
 export const ERRO_SLUG_DUPLICADO = 'Esse endereço já está em uso, escolha outro.'
 
