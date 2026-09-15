@@ -5,6 +5,7 @@ import { MemoryRouter } from 'react-router-dom'
 import ConfiguracoesPage from '@/pages/Configuracoes'
 import { getLoja, updateLoja } from '@/lib/loja'
 import { useAuth } from '@/hooks/useAuth'
+import { useAssinatura } from '@/hooks/useAssinatura'
 
 vi.mock('@/lib/supabase', () => ({
   supabase: { from: vi.fn() },
@@ -23,6 +24,10 @@ vi.mock('@/hooks/useAuth', () => ({
 vi.mock('@/lib/loja-imagens', () => ({
   uploadImagemLoja: vi.fn(),
   removerImagemLoja: vi.fn(),
+}))
+
+vi.mock('@/hooks/useAssinatura', () => ({
+  useAssinatura: vi.fn(),
 }))
 
 const lojaExemplo = {
@@ -81,6 +86,14 @@ beforeEach(() => {
     session: {} as never,
     loading: false,
     signOut: vi.fn(),
+  })
+  vi.mocked(useAssinatura).mockReturnValue({
+    status: 'active',
+    diasRestantesTrial: null,
+    temAcessoCompleto: true,
+    carregando: false,
+    erro: null,
+    recarregar: vi.fn(),
   })
 })
 
@@ -366,5 +379,21 @@ describe('ConfiguracoesPage', () => {
 
     expect(await screen.findByText(/alterações salvas/i)).toBeInTheDocument()
     expect(updateLoja).toHaveBeenCalledWith('user-1', expect.objectContaining({ vitrine_publica: true }))
+  })
+
+  it('desabilita o botão Salvar quando não há acesso completo', async () => {
+    vi.mocked(getLoja).mockResolvedValue(lojaExemplo)
+    vi.mocked(useAssinatura).mockReturnValue({
+      status: 'overdue',
+      diasRestantesTrial: null,
+      temAcessoCompleto: false,
+      carregando: false,
+      erro: null,
+      recarregar: vi.fn(),
+    })
+
+    renderPagina()
+
+    expect(await screen.findByRole('button', { name: /salvar/i })).toBeDisabled()
   })
 })

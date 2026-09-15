@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import type { z } from 'zod'
 import { useAuth } from '@/hooks/useAuth'
 import { useLoja } from '@/hooks/useLoja'
+import { useAssinatura } from '@/hooks/useAssinatura'
 import { lojaSchema, type LojaFormValues } from '@/lib/loja-schema'
 import { updateLoja, ERRO_SLUG_DUPLICADO, type LojaPayload } from '@/lib/loja'
 import { gerarSlug } from '@/lib/slug'
@@ -64,6 +65,7 @@ const valoresIniciais: z.input<typeof lojaSchema> = {
 export default function ConfiguracoesPage() {
   const { user } = useAuth()
   const { loja, carregando, erro, recarregar } = useLoja(user?.id)
+  const { temAcessoCompleto } = useAssinatura()
   const [erroSalvar, setErroSalvar] = useState<string | null>(null)
   const [salvando, setSalvando] = useState(false)
   const [salvo, setSalvo] = useState(false)
@@ -474,9 +476,14 @@ export default function ConfiguracoesPage() {
               </p>
             )}
 
-            <Button type="submit" disabled={salvando}>
+            <Button type="submit" disabled={salvando || !temAcessoCompleto}>
               {salvando ? 'Salvando...' : 'Salvar'}
             </Button>
+            {!temAcessoCompleto && (
+              <p className="text-sm text-muted-foreground">
+                Sua conta está em modo leitura — assine para poder salvar alterações.
+              </p>
+            )}
           </form>
         </CardContent>
       </Card>
