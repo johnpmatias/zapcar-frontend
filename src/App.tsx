@@ -11,6 +11,7 @@ import VeiculoFormPage from '@/pages/VeiculoForm'
 import ConfiguracoesPage from '@/pages/Configuracoes'
 import VitrinePage from '@/pages/Vitrine'
 import LeadsPage from '@/pages/Leads'
+import AssinaturaPage from '@/pages/Assinatura'
 
 function App() {
   return (
@@ -74,6 +75,14 @@ function App() {
         element={
           <ProtectedRoute>
             <ConfiguracoesPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/assinatura"
+        element={
+          <ProtectedRoute>
+            <AssinaturaPage />
           </ProtectedRoute>
         }
       />
