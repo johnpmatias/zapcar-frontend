@@ -36,14 +36,14 @@ export default function VitrinePage() {
   const { loja, veiculos, disponivel, carregando, erro, recarregar } = useVitrine(slug ?? '')
 
   useEffect(() => {
-    if (!loja?.meta_pixel_id) return
+    if (!disponivel || !loja?.meta_pixel_id) return
     return injetarMetaPixel(loja.meta_pixel_id)
-  }, [loja?.meta_pixel_id])
+  }, [disponivel, loja?.meta_pixel_id])
 
   useEffect(() => {
-    if (!loja?.google_tag_id) return
+    if (!disponivel || !loja?.google_tag_id) return
     return injetarGoogleTag(loja.google_tag_id)
-  }, [loja?.google_tag_id])
+  }, [disponivel, loja?.google_tag_id])
 
   if (carregando) {
     return <p className="p-8 text-center text-muted-foreground">Carregando...</p>
