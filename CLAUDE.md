@@ -26,14 +26,17 @@ Plano de implementação de Configurações da loja: `docs/superpowers/plans/202
 Spec de Reordenação manual dos veículos: `docs/superpowers/specs/2026-09-14-reordenacao-veiculos-design.md`
 Plano de implementação de Reordenação manual dos veículos: `docs/superpowers/plans/2026-09-14-reordenacao-veiculos.md`
 
+Spec de Vitrine pública: `docs/superpowers/specs/2026-09-14-vitrine-publica-design.md`
+Plano de implementação de Vitrine pública: `docs/superpowers/plans/2026-09-14-vitrine-publica.md`
+
 ## Roteiro — próximos sub-projetos (nesta ordem)
 
 1. ~~Fundação~~ ✅ completo
 2. ~~CRUD de veículos~~ ✅ completo
-3. **Vitrine pública com CTA de WhatsApp** (`/v/:slug`) — dividido em três sub-projetos menores, cada um com spec+plano+implementação próprios:
+3. ~~Vitrine pública com CTA de WhatsApp~~ (`/v/:slug`) ✅ completo — dividido em três sub-projetos menores:
    - 3a. ~~Configurações da loja~~ ✅ completo.
    - 3b. ~~Reordenação manual dos veículos~~ ✅ completo.
-   - 3c. Vitrine pública (`/v/:slug`) propriamente dita — consome os dados de 3a e a ordem de 3b, com CTA de WhatsApp por veículo.
+   - 3c. ~~Vitrine pública (`/v/:slug`)~~ ✅ completo.
 4. Dashboard CRM (histórico de conversa, temperatura do lead, assumir conversa manualmente).
 5. Billing (Stripe) + landing page.
 
@@ -51,14 +54,6 @@ Cada sub-projeto segue o mesmo ciclo: brainstorming (spec) → writing-plans (pl
 ## Sobre o usuário (preferências de colaboração)
 
 Analista de sistemas, não programa profissionalmente há mais de 12 anos mas entende bem lógica de programação. É autista e tem TDAH — precisa de previsibilidade maior que a média e a motivação para o projeto oscila. Por isso: trabalhar em pedaços pequenos e bem definidos, cada um terminando em algo visível/testável, em vez de um esforço grande e aberto. Manter specs e planos escritos e versionados como âncora externa pra retomar contexto depois de uma pausa.
-
-## Pendência conhecida (não bloqueante)
-
-O trigger `handle_new_user` cria lojas novas com `vitrine_publica = true` por padrão (deveria ser `false` até o lojista ativar de propósito). Não é urgente (loja nova nasce sem `slug`, então não é alcançável publicamente), mas vale rodar antes de começar o sub-projeto da Vitrine Pública:
-
-```sql
-alter table public.lojas alter column vitrine_publica set default false;
-```
 
 ## Pendências de back-end já aplicadas
 
