@@ -557,7 +557,7 @@ export type LojaPayload = Omit<Loja, 'id' | 'user_id' | 'created_at'>
 - [ ] **Step 8: Rodar e confirmar que passa**
 
 Run: `npx tsc -b && npm test -- loja.test`
-Expected: sem erros de tipo; PASS (5 testes)
+Expected: sem erros de tipo; PASS (6 testes — os mesmos já existentes, nenhum novo nesta task)
 
 - [ ] **Step 9: Escrever os testes da UI (falhando)**
 
