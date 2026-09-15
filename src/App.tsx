@@ -6,6 +6,7 @@ import DashboardPage from '@/pages/Dashboard'
 import VeiculosPage from '@/pages/Veiculos'
 import VeiculoFormPage from '@/pages/VeiculoForm'
 import ConfiguracoesPage from '@/pages/Configuracoes'
+import VitrinePage from '@/pages/Vitrine'
 
 function App() {
   return (
@@ -52,6 +53,7 @@ function App() {
           </ProtectedRoute>
         }
       />
+      <Route path="/v/:slug" element={<VitrinePage />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )
