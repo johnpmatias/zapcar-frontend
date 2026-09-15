@@ -29,6 +29,11 @@ Plano de implementação de Reordenação manual dos veículos: `docs/superpower
 Spec de Vitrine pública: `docs/superpowers/specs/2026-09-14-vitrine-publica-design.md`
 Plano de implementação de Vitrine pública: `docs/superpowers/plans/2026-09-14-vitrine-publica.md`
 
+Spec de Dashboard CRM: `docs/superpowers/specs/2026-09-15-dashboard-crm-design.md`
+Plano de implementação de Dashboard CRM: `docs/superpowers/plans/2026-09-15-dashboard-crm.md`
+
+O Dashboard CRM (rota `/leads`) está completo e no ar: oferece gestão centralizada de leads com histórico de conversa, indicadores de temperatura do lead (engajamento) e controle manual do atendimento.
+
 ## Roteiro — próximos sub-projetos (nesta ordem)
 
 1. ~~Fundação~~ ✅ completo
@@ -37,7 +42,7 @@ Plano de implementação de Vitrine pública: `docs/superpowers/plans/2026-09-14
    - 3a. ~~Configurações da loja~~ ✅ completo.
    - 3b. ~~Reordenação manual dos veículos~~ ✅ completo.
    - 3c. ~~Vitrine pública (`/v/:slug`)~~ ✅ completo.
-4. Dashboard CRM (histórico de conversa, temperatura do lead, assumir conversa manualmente).
+4. ~~Dashboard CRM~~ ✅ completo.
 5. Billing (Stripe) + landing page.
 
 Cada sub-projeto segue o mesmo ciclo: brainstorming (spec) → writing-plans (plano) → subagent-driven-development (execução) → finishing-a-development-branch (merge).

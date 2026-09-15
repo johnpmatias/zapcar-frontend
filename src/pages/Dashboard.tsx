@@ -12,6 +12,9 @@ export default function DashboardPage() {
       <Link to="/veiculos" className="underline">
         Ver veículos
       </Link>
+      <Link to="/leads" className="underline">
+        CRM
+      </Link>
       <Link to="/configuracoes" className="underline">
         Configurações da loja
       </Link>
