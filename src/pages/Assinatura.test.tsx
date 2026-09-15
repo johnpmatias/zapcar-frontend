@@ -101,4 +101,21 @@ describe('AssinaturaPage', () => {
 
     expect(await screen.findByText('CONFIRMED')).toBeInTheDocument()
   })
+
+  it('mostra um erro quando o histórico de cobranças falha ao carregar', async () => {
+    vi.mocked(useAssinatura).mockReturnValue({
+      status: 'active',
+      diasRestantesTrial: null,
+      temAcessoCompleto: true,
+      carregando: false,
+      erro: null,
+      recarregar: vi.fn(),
+    })
+    vi.mocked(listarCobrancas).mockRejectedValue(new Error('Falha ao carregar cobranças.'))
+
+    render(<AssinaturaPage />)
+
+    expect(await screen.findByText('Falha ao carregar cobranças.')).toBeInTheDocument()
+    expect(screen.queryByText(/nenhuma cobrança ainda/i)).not.toBeInTheDocument()
+  })
 })

@@ -18,10 +18,12 @@ export default function AssinaturaPage() {
   const [erroAssinar, setErroAssinar] = useState<string | null>(null)
   const [cobrancas, setCobrancas] = useState<Cobranca[]>([])
   const [carregandoCobrancas, setCarregandoCobrancas] = useState(true)
+  const [erroCobrancas, setErroCobrancas] = useState<string | null>(null)
 
   useEffect(() => {
     listarCobrancas()
       .then(setCobrancas)
+      .catch((e: Error) => setErroCobrancas(e.message))
       .finally(() => setCarregandoCobrancas(false))
   }, [])
 
@@ -65,10 +67,15 @@ export default function AssinaturaPage() {
           <div className="flex flex-col gap-2">
             <h2 className="text-lg font-semibold">Histórico de cobranças</h2>
             {carregandoCobrancas && <p className="text-sm text-muted-foreground">Carregando...</p>}
-            {!carregandoCobrancas && cobrancas.length === 0 && (
+            {erroCobrancas && (
+              <p role="alert" className="text-sm text-destructive">
+                {erroCobrancas}
+              </p>
+            )}
+            {!carregandoCobrancas && !erroCobrancas && cobrancas.length === 0 && (
               <p className="text-sm text-muted-foreground">Nenhuma cobrança ainda.</p>
             )}
-            {cobrancas.length > 0 && (
+            {!erroCobrancas && cobrancas.length > 0 && (
               <ul className="flex flex-col gap-2">
                 {cobrancas.map((cobranca) => (
                   <li key={cobranca.id} className="flex items-center justify-between rounded-md border p-2 text-sm">
