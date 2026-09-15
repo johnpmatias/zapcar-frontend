@@ -19,13 +19,15 @@ export function PainelConversaLead({ lead, onFechar, onBotAtivoAlterado }: Paine
   const [carregando, setCarregando] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
   const [alternandoBot, setAlternandoBot] = useState(false)
+  const leadId = lead?.id
 
   useEffect(() => {
-    if (!lead) return
+    if (!leadId) return
     let cancelado = false
     setCarregando(true)
     setErro(null)
-    getInteracoes(lead.id)
+    setInteracoes([])
+    getInteracoes(leadId)
       .then((dados) => {
         if (!cancelado) setInteracoes(dados)
       })
@@ -38,7 +40,7 @@ export function PainelConversaLead({ lead, onFechar, onBotAtivoAlterado }: Paine
     return () => {
       cancelado = true
     }
-  }, [lead])
+  }, [leadId])
 
   async function alternarBot() {
     if (!lead) return
@@ -86,7 +88,10 @@ export function PainelConversaLead({ lead, onFechar, onBotAtivoAlterado }: Paine
                     : 'self-end bg-primary text-primary-foreground'
                 }`}
               >
-                {ROTULO_TIPO[interacao.tipo] ?? interacao.conteudo}
+                {ROTULO_TIPO[interacao.tipo] && (
+                  <span className="mb-1 block text-xs opacity-70">{ROTULO_TIPO[interacao.tipo]}</span>
+                )}
+                {interacao.conteudo}
               </div>
             ))}
           </div>

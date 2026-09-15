@@ -16,14 +16,17 @@ export default function LeadsPage() {
   }, [leads])
 
   async function moverLead(leadId: string, novaTemperatura: TemperaturaLead) {
-    const anterior = leadsExibidos
+    const leadAnterior = leadsExibidos.find((l) => l.id === leadId)
+    const temperaturaAnterior = leadAnterior?.temperatura ?? null
     setErroMovimento(null)
     setLeadsExibidos((atual) => atual.map((l) => (l.id === leadId ? { ...l, temperatura: novaTemperatura } : l)))
 
     try {
       await updateLeadTemperatura(leadId, novaTemperatura)
     } catch (e) {
-      setLeadsExibidos(anterior)
+      setLeadsExibidos((atual) =>
+        atual.map((l) => (l.id === leadId ? { ...l, temperatura: temperaturaAnterior } : l))
+      )
       setErroMovimento((e as Error).message)
     }
   }

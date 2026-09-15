@@ -2,11 +2,17 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import LeadsPage from '@/pages/Leads'
-import { getLeads, updateLeadTemperatura } from '@/lib/leads'
+import { getLeads, updateLeadTemperatura, setLeadBotAtivo } from '@/lib/leads'
 
 vi.mock('@/lib/leads', async () => {
   const real = await vi.importActual<typeof import('@/lib/leads')>('@/lib/leads')
-  return { ...real, getLeads: vi.fn(), updateLeadTemperatura: vi.fn(), getInteracoes: vi.fn().mockResolvedValue([]) }
+  return {
+    ...real,
+    getLeads: vi.fn(),
+    updateLeadTemperatura: vi.fn(),
+    getInteracoes: vi.fn().mockResolvedValue([]),
+    setLeadBotAtivo: vi.fn(),
+  }
 })
 
 const leadBase = {
@@ -22,6 +28,7 @@ const leadBase = {
 beforeEach(() => {
   vi.mocked(getLeads).mockReset()
   vi.mocked(updateLeadTemperatura).mockReset()
+  vi.mocked(setLeadBotAtivo).mockReset()
 })
 
 function renderPagina() {
@@ -63,5 +70,22 @@ describe('LeadsPage', () => {
     ;(await screen.findByRole('button', { name: 'Maria Silva' })).click()
 
     expect(await screen.findByRole('button', { name: 'Assumir conversa' })).toBeInTheDocument()
+  })
+
+  it('atualiza o badge do card no Kanban quando o bot é alternado pelo painel', async () => {
+    vi.mocked(getLeads).mockResolvedValue([
+      { ...leadBase, id: '1', nome: 'Maria Silva', telefone: '1', temperatura: 'Frio', bot_ativo: true },
+    ])
+    vi.mocked(setLeadBotAtivo).mockResolvedValue(undefined)
+
+    renderPagina()
+
+    expect(await screen.findByText('Bot ativo')).toBeInTheDocument()
+
+    ;(await screen.findByRole('button', { name: 'Maria Silva' })).click()
+    ;(await screen.findByRole('button', { name: 'Assumir conversa' })).click()
+
+    expect(await screen.findByText('Atendimento humano')).toBeInTheDocument()
+    expect(screen.queryByText('Bot ativo')).not.toBeInTheDocument()
   })
 })

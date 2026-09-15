@@ -140,4 +140,24 @@ describe('PainelConversaLead', () => {
     expect(screen.getByText('Mensagem do lead B')).toBeInTheDocument()
     expect(screen.queryByText('Oi, quero saber do Civic')).not.toBeInTheDocument()
   })
+
+  it('mostra o rótulo do tipo junto com o conteúdo real (transcrição/descrição), sem escondê-lo', async () => {
+    vi.mocked(getInteracoes).mockResolvedValue([
+      {
+        id: '3',
+        lead_id: '1',
+        remetente: 'LEAD',
+        tipo: 'audioMessage',
+        conteudo: 'Transcrição: quero agendar um test drive amanhã de manhã',
+        created_at: '2026-09-14T10:03:00.000Z',
+      },
+    ])
+
+    render(<PainelConversaLead lead={lead} onFechar={vi.fn()} onBotAtivoAlterado={vi.fn()} />)
+
+    expect(await screen.findByText('🎤 Áudio')).toBeInTheDocument()
+    expect(
+      screen.getByText('Transcrição: quero agendar um test drive amanhã de manhã')
+    ).toBeInTheDocument()
+  })
 })
