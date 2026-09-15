@@ -1,4 +1,9 @@
+const META_PIXEL_ID_REGEX = /^\d{5,20}$/
+const GOOGLE_TAG_ID_REGEX = /^(G|GTM|AW|UA|DC)-[A-Z0-9-]{4,20}$/i
+
 export function injetarMetaPixel(pixelId: string): () => void {
+  if (!META_PIXEL_ID_REGEX.test(pixelId)) return () => {}
+
   const id = 'zapcar-meta-pixel'
   if (document.getElementById(id)) return () => {}
 
@@ -17,6 +22,8 @@ export function injetarMetaPixel(pixelId: string): () => void {
 }
 
 export function injetarGoogleTag(tagId: string): () => void {
+  if (!GOOGLE_TAG_ID_REGEX.test(tagId)) return () => {}
+
   const idLib = 'zapcar-google-tag-lib'
   const idConfig = 'zapcar-google-tag-config'
   if (document.getElementById(idConfig)) return () => {}

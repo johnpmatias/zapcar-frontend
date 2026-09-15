@@ -27,6 +27,12 @@ describe('injetarMetaPixel', () => {
 
     expect(document.querySelectorAll('#zapcar-meta-pixel')).toHaveLength(1)
   })
+
+  it('não injeta script quando o id é malicioso/inválido', () => {
+    injetarMetaPixel("1');/*XSS payload*/;//")
+
+    expect(document.getElementById('zapcar-meta-pixel')).toBeNull()
+  })
 })
 
 describe('injetarGoogleTag', () => {
@@ -42,6 +48,13 @@ describe('injetarGoogleTag', () => {
   it('remove os dois scripts quando a função de limpeza é chamada', () => {
     const remover = injetarGoogleTag('G-ABC123')
     remover()
+
+    expect(document.getElementById('zapcar-google-tag-lib')).toBeNull()
+    expect(document.getElementById('zapcar-google-tag-config')).toBeNull()
+  })
+
+  it('não injeta script quando o id é malicioso/inválido', () => {
+    injetarGoogleTag("G-ABC');/*XSS payload*/;//")
 
     expect(document.getElementById('zapcar-google-tag-lib')).toBeNull()
     expect(document.getElementById('zapcar-google-tag-config')).toBeNull()
