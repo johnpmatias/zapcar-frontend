@@ -15,6 +15,12 @@ dist-ssr
 # Sessões do companheiro visual de brainstorming (superpowers)
 .superpowers/
 
+# Worktrees isolados criados pelo Claude Code (EnterWorktree) — deixar um
+# worktree aninhado aqui sem ignorar faz o Vitest descobrir os arquivos de
+# teste duplicados de dentro dele e falhar de mentira (visto na prática:
+# 52 "test files" em vez de 26, quando um worktree ficou parado aqui).
+.claude/worktrees/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
