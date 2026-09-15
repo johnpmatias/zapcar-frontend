@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useVeiculos } from '@/hooks/useVeiculos'
+import { useAssinatura } from '@/hooks/useAssinatura'
 import { deleteVeiculo, listVeiculos, reorderVeiculos, type Veiculo } from '@/lib/veiculos'
 import { Button } from '@/components/ui/button'
 import { ListaReordenavel } from '@/components/veiculos/ListaReordenavel'
@@ -10,6 +11,7 @@ const STATUS_REORDENAVEL = ['disponivel', 'reservado']
 
 export default function VeiculosPage() {
   const { veiculos, carregando, erro, recarregar } = useVeiculos()
+  const { temAcessoCompleto } = useAssinatura()
   const [excluindoId, setExcluindoId] = useState<string | null>(null)
   const [ordemOtimista, setOrdemOtimista] = useState<Veiculo[] | null>(null)
   const [salvandoOrdem, setSalvandoOrdem] = useState(false)
@@ -81,9 +83,15 @@ export default function VeiculosPage() {
     <div className="mx-auto flex max-w-4xl flex-col gap-4 p-4">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Veículos</h1>
-        <Link to="/veiculos/novo">
-          <Button>Novo veículo</Button>
-        </Link>
+        {temAcessoCompleto ? (
+          <Link to="/veiculos/novo">
+            <Button>Novo veículo</Button>
+          </Link>
+        ) : (
+          <Button disabled title="Assinatura necessária para cadastrar veículos">
+            Novo veículo
+          </Button>
+        )}
       </div>
 
       {carregando && <p className="text-muted-foreground">Carregando...</p>}
@@ -128,7 +136,12 @@ export default function VeiculosPage() {
                 itens={disponiveis}
                 onReordenar={aoReordenar}
                 renderItem={(veiculo) => (
-                  <LinhaVeiculo veiculo={veiculo} excluindoId={excluindoId} onExcluir={excluir} />
+                  <LinhaVeiculo
+                    veiculo={veiculo}
+                    excluindoId={excluindoId}
+                    onExcluir={excluir}
+                    temAcessoCompleto={temAcessoCompleto}
+                  />
                 )}
               />
             )}
@@ -140,7 +153,12 @@ export default function VeiculosPage() {
               <ul className="flex flex-col gap-2">
                 {indisponiveis.map((veiculo) => (
                   <li key={veiculo.id} className="flex items-center gap-2 rounded-md border p-2">
-                    <LinhaVeiculo veiculo={veiculo} excluindoId={excluindoId} onExcluir={excluir} />
+                    <LinhaVeiculo
+                      veiculo={veiculo}
+                      excluindoId={excluindoId}
+                      onExcluir={excluir}
+                      temAcessoCompleto={temAcessoCompleto}
+                    />
                   </li>
                 ))}
               </ul>
