@@ -8,8 +8,8 @@ interface CardVeiculoProps {
   numeroWhatsapp: string | null
 }
 
-function formatarPreco(valor: number): string {
-  return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+function formatarPreco(valor: number | null | undefined): string {
+  return valor != null ? valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : '—'
 }
 
 export function CardVeiculo({ veiculo, numeroWhatsapp }: CardVeiculoProps) {
@@ -53,8 +53,10 @@ export function CardVeiculo({ veiculo, numeroWhatsapp }: CardVeiculoProps) {
           )}
         </div>
         {link && (
-          <Button className="mt-2" render={<a href={link} target="_blank" rel="noreferrer" />}>
-            Falar no WhatsApp
+          <Button className="mt-2" asChild>
+            <a href={link} target="_blank" rel="noreferrer">
+              Falar no WhatsApp
+            </a>
           </Button>
         )}
       </div>

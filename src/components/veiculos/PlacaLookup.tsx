@@ -127,7 +127,7 @@ export function PlacaLookup({ placaAtual, onDadosEncontrados }: PlacaLookupProps
               />
               <span>
                 <span>{versao.texto}</span> — Fipe:{' '}
-                {versao.valorFipe.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                {versao.valorFipe != null ? versao.valorFipe.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : '—'}
               </span>
             </label>
           ))}

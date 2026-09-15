@@ -96,8 +96,10 @@ export default function VitrinePage() {
         {loja.vitrine_headline && <p className="text-lg">{loja.vitrine_headline}</p>}
         {loja.vitrine_subheadline && <p className="text-sm opacity-90">{loja.vitrine_subheadline}</p>}
         {linkCtaGeral && (
-          <Button render={<a href={linkCtaGeral} target="_blank" rel="noreferrer" />}>
-            {loja.vitrine_cta_texto || 'Fale com a gente'}
+          <Button asChild>
+            <a href={linkCtaGeral} target="_blank" rel="noreferrer">
+              {loja.vitrine_cta_texto || 'Fale com a gente'}
+            </a>
           </Button>
         )}
       </header>

@@ -23,7 +23,7 @@ export function LinhaVeiculo({ veiculo, excluindoId, onExcluir }: LinhaVeiculoPr
         <span>{veiculo.marca}</span>
         <span>{veiculo.modelo}</span>
         <span>{veiculo.ano_modelo}</span>
-        <span>{veiculo.preco.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+        <span>{veiculo.preco != null ? veiculo.preco.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : '—'}</span>
         <span>{veiculo.status}</span>
       </div>
       <div className="flex items-center gap-2">
@@ -31,7 +31,9 @@ export function LinhaVeiculo({ veiculo, excluindoId, onExcluir }: LinhaVeiculoPr
           Editar
         </Link>
         <Dialog>
-          <DialogTrigger render={<Button variant="destructive" size="sm" />}>Excluir</DialogTrigger>
+          <DialogTrigger asChild>
+            <Button variant="destructive" size="sm">Excluir</Button>
+          </DialogTrigger>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Excluir veículo</DialogTitle>

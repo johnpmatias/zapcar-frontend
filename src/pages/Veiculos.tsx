@@ -81,7 +81,9 @@ export default function VeiculosPage() {
     <div className="mx-auto flex max-w-4xl flex-col gap-4 p-4">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Veículos</h1>
-        <Button render={<Link to="/veiculos/novo">Novo veículo</Link>} />
+        <Link to="/veiculos/novo">
+          <Button>Novo veículo</Button>
+        </Link>
       </div>
 
       {carregando && <p className="text-muted-foreground">Carregando...</p>}
