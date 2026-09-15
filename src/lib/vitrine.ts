@@ -87,3 +87,9 @@ export async function listVeiculosPublicos(lojaId: string): Promise<Veiculo[]> {
   if (error) throw new Error(error.message)
   return (data ?? []) as Veiculo[]
 }
+
+export async function getAcessoCompletoPublico(lojaId: string): Promise<boolean> {
+  const { data, error } = await supabase.rpc('loja_tem_acesso_completo', { p_loja_id: lojaId })
+  if (error) throw new Error(error.message)
+  return Boolean(data)
+}
