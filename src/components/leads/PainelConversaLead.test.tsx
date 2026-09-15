@@ -89,4 +89,55 @@ describe('PainelConversaLead', () => {
 
     expect(await screen.findByText('falha de rede')).toBeInTheDocument()
   })
+
+  it('ignora resposta desatualizada quando o lead muda antes do getInteracoes resolver', async () => {
+    const leadA = lead
+    const leadB: Lead = { ...lead, id: '2', nome: 'João Souza' }
+
+    let resolverA!: (dados: Interacao[]) => void
+    let resolverB!: (dados: Interacao[]) => void
+    const promiseA = new Promise<Interacao[]>((resolve) => {
+      resolverA = resolve
+    })
+    const promiseB = new Promise<Interacao[]>((resolve) => {
+      resolverB = resolve
+    })
+
+    vi.mocked(getInteracoes).mockImplementation((leadId: string) => {
+      if (leadId === leadA.id) return promiseA
+      if (leadId === leadB.id) return promiseB
+      throw new Error('lead inesperado')
+    })
+
+    const { rerender } = render(
+      <PainelConversaLead lead={leadA} onFechar={vi.fn()} onBotAtivoAlterado={vi.fn()} />
+    )
+
+    // Usuário troca de lead antes da requisição do lead A voltar (ex.: clica em outro card do Kanban).
+    rerender(<PainelConversaLead lead={leadB} onFechar={vi.fn()} onBotAtivoAlterado={vi.fn()} />)
+
+    // A requisição do lead B (mais recente) volta primeiro...
+    resolverB([
+      {
+        id: 'b1',
+        lead_id: leadB.id,
+        remetente: 'LEAD',
+        tipo: 'conversation',
+        conteudo: 'Mensagem do lead B',
+        created_at: '2026-09-14T10:02:00.000Z',
+      },
+    ])
+    await screen.findByText('Mensagem do lead B')
+
+    // ...e só depois a requisição desatualizada do lead A (que já não deveria mais importar).
+    resolverA(interacoes)
+
+    // Dá tempo pra cadeia .then/.catch/.finally da promise desatualizada terminar de
+    // processar (se não houvesse guarda, é nesse momento que ela sobrescreveria o estado).
+    await new Promise((resolve) => setTimeout(resolve, 0))
+    await new Promise((resolve) => setTimeout(resolve, 0))
+
+    expect(screen.getByText('Mensagem do lead B')).toBeInTheDocument()
+    expect(screen.queryByText('Oi, quero saber do Civic')).not.toBeInTheDocument()
+  })
 })

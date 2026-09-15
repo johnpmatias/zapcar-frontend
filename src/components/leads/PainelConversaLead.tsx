@@ -22,12 +22,22 @@ export function PainelConversaLead({ lead, onFechar, onBotAtivoAlterado }: Paine
 
   useEffect(() => {
     if (!lead) return
+    let cancelado = false
     setCarregando(true)
     setErro(null)
     getInteracoes(lead.id)
-      .then(setInteracoes)
-      .catch((e: Error) => setErro(e.message))
-      .finally(() => setCarregando(false))
+      .then((dados) => {
+        if (!cancelado) setInteracoes(dados)
+      })
+      .catch((e: Error) => {
+        if (!cancelado) setErro(e.message)
+      })
+      .finally(() => {
+        if (!cancelado) setCarregando(false)
+      })
+    return () => {
+      cancelado = true
+    }
   }, [lead])
 
   async function alternarBot() {
