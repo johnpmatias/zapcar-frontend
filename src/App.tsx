@@ -7,6 +7,7 @@ import VeiculosPage from '@/pages/Veiculos'
 import VeiculoFormPage from '@/pages/VeiculoForm'
 import ConfiguracoesPage from '@/pages/Configuracoes'
 import VitrinePage from '@/pages/Vitrine'
+import LeadsPage from '@/pages/Leads'
 
 function App() {
   return (
@@ -42,6 +43,14 @@ function App() {
         element={
           <ProtectedRoute>
             <VeiculoFormPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/leads"
+        element={
+          <ProtectedRoute>
+            <LeadsPage />
           </ProtectedRoute>
         }
       />
