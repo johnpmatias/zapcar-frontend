@@ -14,9 +14,10 @@ interface LinhaVeiculoProps {
   veiculo: Veiculo
   excluindoId: string | null
   onExcluir: (id: string) => void
+  temAcessoCompleto: boolean
 }
 
-export function LinhaVeiculo({ veiculo, excluindoId, onExcluir }: LinhaVeiculoProps) {
+export function LinhaVeiculo({ veiculo, excluindoId, onExcluir, temAcessoCompleto }: LinhaVeiculoProps) {
   return (
     <div className="flex flex-1 flex-wrap items-center justify-between gap-2 text-sm">
       <div className="flex flex-1 flex-wrap gap-4">
@@ -27,11 +28,17 @@ export function LinhaVeiculo({ veiculo, excluindoId, onExcluir }: LinhaVeiculoPr
         <span>{veiculo.status}</span>
       </div>
       <div className="flex items-center gap-2">
-        <Link to={`/veiculos/${veiculo.id}/editar`} className="underline">
-          Editar
-        </Link>
+        {temAcessoCompleto && (
+          <Link to={`/veiculos/${veiculo.id}/editar`} className="underline">
+            Editar
+          </Link>
+        )}
         <Dialog>
-          <DialogTrigger render={<Button variant="destructive" size="sm" />}>Excluir</DialogTrigger>
+          <DialogTrigger
+            render={<Button variant="destructive" size="sm" disabled={!temAcessoCompleto} />}
+          >
+            Excluir
+          </DialogTrigger>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Excluir veículo</DialogTitle>

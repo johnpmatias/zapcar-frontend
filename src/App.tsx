@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
 import { PublicHomeRoute } from '@/components/PublicHomeRoute'
+import { RequireAssinaturaAtiva } from '@/components/RequireAssinaturaAtiva'
 import LandingPage from '@/pages/Landing'
 import LoginPage from '@/pages/Login'
 import SignupPage from '@/pages/Signup'
@@ -10,6 +11,7 @@ import VeiculoFormPage from '@/pages/VeiculoForm'
 import ConfiguracoesPage from '@/pages/Configuracoes'
 import VitrinePage from '@/pages/Vitrine'
 import LeadsPage from '@/pages/Leads'
+import AssinaturaPage from '@/pages/Assinatura'
 
 function App() {
   return (
@@ -44,7 +46,9 @@ function App() {
         path="/veiculos/novo"
         element={
           <ProtectedRoute>
-            <VeiculoFormPage />
+            <RequireAssinaturaAtiva>
+              <VeiculoFormPage />
+            </RequireAssinaturaAtiva>
           </ProtectedRoute>
         }
       />
@@ -52,7 +56,9 @@ function App() {
         path="/veiculos/:id/editar"
         element={
           <ProtectedRoute>
-            <VeiculoFormPage />
+            <RequireAssinaturaAtiva>
+              <VeiculoFormPage />
+            </RequireAssinaturaAtiva>
           </ProtectedRoute>
         }
       />
@@ -69,6 +75,14 @@ function App() {
         element={
           <ProtectedRoute>
             <ConfiguracoesPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/assinatura"
+        element={
+          <ProtectedRoute>
+            <AssinaturaPage />
           </ProtectedRoute>
         }
       />

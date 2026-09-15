@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
-import { LinhaVeiculo } from './LinhaVeiculo'
+import { LinhaVeiculo } from '@/components/veiculos/LinhaVeiculo'
 import type { Veiculo } from '@/lib/veiculos'
 
 const veiculo = {
@@ -14,10 +14,23 @@ const veiculo = {
   status: 'disponivel',
 } as Veiculo
 
-function renderComponente(excluindoId: string | null = null, onExcluir = vi.fn()) {
+function renderComponente({
+  excluindoId = null,
+  onExcluir = vi.fn(),
+  temAcessoCompleto = true,
+}: {
+  excluindoId?: string | null
+  onExcluir?: (id: string) => void
+  temAcessoCompleto?: boolean
+} = {}) {
   return render(
     <MemoryRouter>
-      <LinhaVeiculo veiculo={veiculo} excluindoId={excluindoId} onExcluir={onExcluir} />
+      <LinhaVeiculo
+        veiculo={veiculo}
+        excluindoId={excluindoId}
+        onExcluir={onExcluir}
+        temAcessoCompleto={temAcessoCompleto}
+      />
     </MemoryRouter>
   )
 }
@@ -34,7 +47,7 @@ describe('LinhaVeiculo', () => {
   it('chama onExcluir com o id após confirmação', async () => {
     const onExcluir = vi.fn()
     const usuario = userEvent.setup()
-    renderComponente(null, onExcluir)
+    renderComponente({ onExcluir })
 
     await usuario.click(screen.getByRole('button', { name: /excluir/i }))
     await usuario.click(screen.getByRole('button', { name: /confirmar exclusão/i }))
@@ -44,10 +57,22 @@ describe('LinhaVeiculo', () => {
 
   it('desabilita o botão de confirmar quando excluindoId bate com o veículo', async () => {
     const usuario = userEvent.setup()
-    renderComponente('1')
+    renderComponente({ excluindoId: '1' })
 
     await usuario.click(screen.getByRole('button', { name: /excluir/i }))
 
     expect(screen.getByRole('button', { name: /confirmar exclusão/i })).toBeDisabled()
+  })
+
+  it('mostra os links de editar/excluir quando há acesso completo', () => {
+    renderComponente({ temAcessoCompleto: true })
+    expect(screen.getByText('Editar')).toBeInTheDocument()
+    expect(screen.getByText('Excluir')).not.toBeDisabled()
+  })
+
+  it('esconde editar e desabilita excluir em modo leitura', () => {
+    renderComponente({ temAcessoCompleto: false })
+    expect(screen.queryByText('Editar')).not.toBeInTheDocument()
+    expect(screen.getByText('Excluir')).toBeDisabled()
   })
 })

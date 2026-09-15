@@ -11,6 +11,17 @@ vi.mock('@/lib/veiculos', () => ({
   reorderVeiculos: vi.fn(),
 }))
 
+vi.mock('@/hooks/useAssinatura', () => ({
+  useAssinatura: () => ({
+    status: 'active',
+    diasRestantesTrial: null,
+    temAcessoCompleto: true,
+    carregando: false,
+    erro: null,
+    recarregar: vi.fn(),
+  }),
+}))
+
 // dnd-kit mede a posição de cada item arrastável via getBoundingClientRect
 // pra decidir, ao pressionar uma seta, qual é o "próximo" item na direção
 // pressionada — ver a mesma explicação em ListaReordenavel.test.tsx.

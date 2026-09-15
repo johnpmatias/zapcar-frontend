@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import VitrinePage from '@/pages/Vitrine'
-import { getLojaPublica, listVeiculosPublicos } from '@/lib/vitrine'
+import { getLojaPublica, getAcessoCompletoPublico, listVeiculosPublicos } from '@/lib/vitrine'
 
 vi.mock('@/lib/supabase', () => ({
   supabase: { from: vi.fn() },
@@ -10,6 +10,7 @@ vi.mock('@/lib/supabase', () => ({
 
 vi.mock('@/lib/vitrine', () => ({
   getLojaPublica: vi.fn(),
+  getAcessoCompletoPublico: vi.fn(),
   listVeiculosPublicos: vi.fn(),
   ehUrlSegura: (url: string | null | undefined) => Boolean(url) && /^https?:\/\//i.test(url as string),
 }))
@@ -85,6 +86,7 @@ const veiculoExemplo = {
 
 beforeEach(() => {
   vi.mocked(getLojaPublica).mockReset()
+  vi.mocked(getAcessoCompletoPublico).mockReset().mockResolvedValue(true)
   vi.mocked(listVeiculosPublicos).mockReset()
   document.head.innerHTML = ''
 })
@@ -176,5 +178,15 @@ describe('VitrinePage', () => {
     expect(screen.queryByRole('link', { name: /instagram/i })).toBeNull()
     expect(screen.queryByRole('link', { name: /ver no mapa/i })).toBeNull()
     expect(document.querySelector('a[href^="javascript:"]')).toBeNull()
+  })
+
+  it('mostra mensagem de indisponibilidade quando a loja está em modo leitura', async () => {
+    vi.mocked(getLojaPublica).mockResolvedValue(lojaExemplo as never)
+    vi.mocked(getAcessoCompletoPublico).mockResolvedValue(false)
+
+    renderPagina()
+
+    expect(await screen.findByText(/vitrine está indisponível/i)).toBeInTheDocument()
+    expect(listVeiculosPublicos).not.toHaveBeenCalled()
   })
 })
