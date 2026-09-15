@@ -11,6 +11,7 @@ vi.mock('@/lib/supabase', () => ({
 vi.mock('@/lib/vitrine', () => ({
   getLojaPublica: vi.fn(),
   listVeiculosPublicos: vi.fn(),
+  ehUrlSegura: (url: string | null | undefined) => Boolean(url) && /^https?:\/\//i.test(url as string),
 }))
 
 const lojaExemplo = {
@@ -149,12 +150,31 @@ describe('VitrinePage', () => {
   })
 
   it('injeta o script de tracking quando meta_pixel_id está preenchido', async () => {
-    vi.mocked(getLojaPublica).mockResolvedValue({ ...lojaExemplo, meta_pixel_id: '999' } as never)
+    vi.mocked(getLojaPublica).mockResolvedValue({ ...lojaExemplo, meta_pixel_id: '999999999999999' } as never)
     vi.mocked(listVeiculosPublicos).mockResolvedValue([])
 
     renderPagina()
 
     await screen.findByText('Auto Center Silva')
     expect(document.getElementById('zapcar-meta-pixel')).not.toBeNull()
+  })
+
+  it('não renderiza o CTA nem redes sociais quando os destinos usam esquema javascript:', async () => {
+    vi.mocked(getLojaPublica).mockResolvedValue({
+      ...lojaExemplo,
+      telefone_contato: null,
+      vitrine_cta_destino: "javascript:alert('xss')",
+      instagram_url: "javascript:alert('xss')",
+      google_maps_link: "javascript:alert('xss')",
+    } as never)
+    vi.mocked(listVeiculosPublicos).mockResolvedValue([])
+
+    renderPagina()
+
+    await screen.findByText('Auto Center Silva')
+    expect(screen.queryByRole('link', { name: /fale com a gente/i })).toBeNull()
+    expect(screen.queryByRole('link', { name: /instagram/i })).toBeNull()
+    expect(screen.queryByRole('link', { name: /ver no mapa/i })).toBeNull()
+    expect(document.querySelector('a[href^="javascript:"]')).toBeNull()
   })
 })

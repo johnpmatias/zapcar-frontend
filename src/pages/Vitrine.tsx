@@ -5,7 +5,7 @@ import { formatarNumeroWhatsapp, montarLinkWhatsapp } from '@/lib/whatsapp'
 import { injetarGoogleTag, injetarMetaPixel } from '@/lib/tracking'
 import { CardVeiculo } from '@/components/vitrine/CardVeiculo'
 import { Button } from '@/components/ui/button'
-import type { LojaPublica } from '@/lib/vitrine'
+import { ehUrlSegura, type LojaPublica } from '@/lib/vitrine'
 
 const DIAS_HORARIO: { abertura: keyof LojaPublica; fechamento: keyof LojaPublica; label: string }[] = [
   { abertura: 'horario_semana_abertura', fechamento: 'horario_semana_fechamento', label: 'Seg-sex' },
@@ -71,11 +71,13 @@ export default function VitrinePage() {
   }
 
   const numeroWhatsapp = formatarNumeroWhatsapp(loja.telefone_contato)
+  const ctaDestinoSeguro = ehUrlSegura(loja.vitrine_cta_destino) ? loja.vitrine_cta_destino : null
   const linkCtaGeral =
-    loja.vitrine_cta_destino ||
+    ctaDestinoSeguro ||
     (numeroWhatsapp
       ? montarLinkWhatsapp(numeroWhatsapp, 'Olá! Vi a vitrine e gostaria de mais informações.')
       : null)
+  const linkMapaSeguro = ehUrlSegura(loja.google_maps_link) ? loja.google_maps_link : null
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -118,10 +120,10 @@ export default function VitrinePage() {
         {temEndereco(loja) && (
           <p>
             {[loja.logradouro, loja.numero, loja.bairro, loja.cidade, loja.estado].filter(Boolean).join(', ')}
-            {loja.google_maps_link && (
+            {linkMapaSeguro && (
               <>
                 {' · '}
-                <a href={loja.google_maps_link} target="_blank" rel="noreferrer" className="underline">
+                <a href={linkMapaSeguro} target="_blank" rel="noreferrer" className="underline">
                   Ver no mapa
                 </a>
               </>
@@ -134,7 +136,7 @@ export default function VitrinePage() {
           ))}
         </div>
         <div className="flex gap-3">
-          {REDES_SOCIAIS.filter((rede) => loja[rede.campo]).map((rede) => (
+          {REDES_SOCIAIS.filter((rede) => ehUrlSegura(loja[rede.campo] as string | null)).map((rede) => (
             <a
               key={rede.campo}
               href={loja[rede.campo] as string}
