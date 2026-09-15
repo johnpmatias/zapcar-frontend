@@ -48,10 +48,11 @@ Nenhuma tabela de configuração de WhatsApp (`lojas_config_whatsapp`) é usada 
 - `src/lib/vitrine.ts` (novo):
   - `getLojaPublica(slug: string): Promise<LojaPublica | null>` — `supabase.from('lojas').select('<colunas de LojaPublica>').eq('slug', slug).eq('vitrine_publica', true).maybeSingle()`. Retorna `null` tanto para slug inexistente quanto para vitrine desativada — a página não distingue os dois casos.
   - `listVeiculosPublicos(lojaId: string): Promise<Veiculo[]>` — mesma tabela `veiculos`, filtrada por `loja_id`, ordenada `ordem asc, created_at desc` (RLS já filtra por `status`/`vitrine_publica`).
-- `LojaPublica` (tipo novo, em `vitrine.ts`) é o subconjunto de `Loja` (de `loja.ts`) exposto na renderização pública — explicitamente sem `user_id` nem `id` (não usados pela página, e não há motivo pra expor o identificador do dono):
+- `LojaPublica` (tipo novo, em `vitrine.ts`) é o subconjunto de `Loja` (de `loja.ts`) usado pela página — sem `user_id` (não usado, e não há motivo pra expor o identificador do dono). Inclui `id`: não é exibido na tela, mas é necessário pra buscar os veículos daquela loja em `listVeiculosPublicos(loja.id)` — expor o `id` não é um risco novo, já que ele aparece do mesmo jeito em `veiculos.loja_id`, coluna já pública pela outra policy:
 
   ```ts
   type LojaPublica = Pick<Loja,
+    | 'id'
     | 'nome_loja' | 'descricao'
     | 'telefone_contato'
     | 'logradouro' | 'numero' | 'bairro' | 'cidade' | 'estado' | 'cep' | 'google_maps_link'
