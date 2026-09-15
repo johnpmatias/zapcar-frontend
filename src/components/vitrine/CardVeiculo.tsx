@@ -53,10 +53,11 @@ export function CardVeiculo({ veiculo, numeroWhatsapp }: CardVeiculoProps) {
           )}
         </div>
         {link && (
-          <Button className="mt-2" asChild>
-            <a href={link} target="_blank" rel="noreferrer">
-              Falar no WhatsApp
-            </a>
+          <Button
+            className="mt-2"
+            onClick={() => window.open(link, '_blank')}
+          >
+            Falar no WhatsApp
           </Button>
         )}
       </div>

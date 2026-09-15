@@ -31,7 +31,7 @@ export function LinhaVeiculo({ veiculo, excluindoId, onExcluir }: LinhaVeiculoPr
           Editar
         </Link>
         <Dialog>
-          <DialogTrigger asChild>
+          <DialogTrigger>
             <Button variant="destructive" size="sm">Excluir</Button>
           </DialogTrigger>
           <DialogContent>
