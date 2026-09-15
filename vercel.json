@@ -1,5 +1,16 @@
 {
   "rewrites": [
+    {
+      "source": "/v/:slug",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*(facebookexternalhit|WhatsApp|Twitterbot|Slackbot|LinkedInBot|TelegramBot|Discordbot).*"
+        }
+      ],
+      "destination": "/api/vitrine-preview?slug=:slug"
+    },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
