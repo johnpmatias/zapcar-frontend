@@ -36,7 +36,7 @@ export default function LoginPage() {
       return
     }
 
-    navigate('/')
+    navigate('/painel')
   }
 
   return (

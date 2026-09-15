@@ -1,5 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
+import { PublicHomeRoute } from '@/components/PublicHomeRoute'
+import LandingPage from '@/pages/Landing'
 import LoginPage from '@/pages/Login'
 import SignupPage from '@/pages/Signup'
 import DashboardPage from '@/pages/Dashboard'
@@ -12,10 +14,18 @@ import LeadsPage from '@/pages/Leads'
 function App() {
   return (
     <Routes>
+      <Route
+        path="/"
+        element={
+          <PublicHomeRoute>
+            <LandingPage />
+          </PublicHomeRoute>
+        }
+      />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />
       <Route
-        path="/"
+        path="/painel"
         element={
           <ProtectedRoute>
             <DashboardPage />

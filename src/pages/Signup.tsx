@@ -41,7 +41,7 @@ export default function SignupPage() {
       return
     }
 
-    navigate('/')
+    navigate('/painel')
   }
 
   return (
