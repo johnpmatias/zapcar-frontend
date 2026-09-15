@@ -331,4 +331,36 @@ describe('ConfiguracoesPage', () => {
       })
     )
   })
+
+  it('mostra o switch de vitrine pública desabilitado quando não há slug', async () => {
+    vi.mocked(getLoja).mockResolvedValue({ ...lojaExemplo, slug: null, nome_loja: '' } as never)
+    const usuario = userEvent.setup()
+
+    renderPagina()
+
+    await screen.findByLabelText(/nome da loja/i)
+    await usuario.click(screen.getByRole('tab', { name: /vitrine/i }))
+
+    expect(screen.getByRole('switch', { name: /vitrine pública ativa/i })).toHaveAttribute(
+      'aria-disabled',
+      'true'
+    )
+    expect(screen.getByText(/defina um endereço antes de ativar/i)).toBeInTheDocument()
+  })
+
+  it('ativa e salva a vitrine pública quando há slug', async () => {
+    vi.mocked(getLoja).mockResolvedValue({ ...lojaExemplo, slug: 'auto-center-silva' } as never)
+    vi.mocked(updateLoja).mockResolvedValue(lojaExemplo as never)
+    const usuario = userEvent.setup()
+
+    renderPagina()
+
+    await screen.findByLabelText(/nome da loja/i)
+    await usuario.click(screen.getByRole('tab', { name: /vitrine/i }))
+    await usuario.click(screen.getByRole('switch', { name: /vitrine pública ativa/i }))
+    await usuario.click(screen.getByRole('button', { name: /salvar/i }))
+
+    expect(await screen.findByText(/alterações salvas/i)).toBeInTheDocument()
+    expect(updateLoja).toHaveBeenCalledWith('user-1', expect.objectContaining({ vitrine_publica: true }))
+  })
 })

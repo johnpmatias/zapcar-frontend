@@ -12,6 +12,7 @@ import { ImagemField } from '@/components/loja/ImagemField'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Switch } from '@/components/ui/switch'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   Tabs,
@@ -43,6 +44,7 @@ const valoresIniciais: z.input<typeof lojaSchema> = {
   cor_primaria: undefined,
   cor_secundaria: undefined,
   slug: undefined,
+  vitrine_publica: false,
   vitrine_headline: undefined,
   vitrine_subheadline: undefined,
   vitrine_cta_texto: undefined,
@@ -112,6 +114,7 @@ export default function ConfiguracoesPage() {
       cor_primaria: loja.cor_primaria ?? undefined,
       cor_secundaria: loja.cor_secundaria ?? undefined,
       slug: loja.slug ?? undefined,
+      vitrine_publica: loja.vitrine_publica ?? false,
       vitrine_headline: loja.vitrine_headline ?? undefined,
       vitrine_subheadline: loja.vitrine_subheadline ?? undefined,
       vitrine_cta_texto: loja.vitrine_cta_texto ?? undefined,
@@ -180,6 +183,7 @@ export default function ConfiguracoesPage() {
       cor_primaria: valores.cor_primaria ?? null,
       cor_secundaria: valores.cor_secundaria ?? null,
       slug: valores.slug ?? null,
+      vitrine_publica: valores.vitrine_publica,
       vitrine_headline: valores.vitrine_headline ?? null,
       vitrine_subheadline: valores.vitrine_subheadline ?? null,
       vitrine_cta_texto: valores.vitrine_cta_texto ?? null,
@@ -360,6 +364,18 @@ export default function ConfiguracoesPage() {
               </TabsContent>
 
               <TabsContent value="vitrine" className="flex flex-col gap-4">
+                <div className="flex items-center gap-2">
+                  <Switch
+                    id="vitrine_publica"
+                    checked={Boolean(form.watch('vitrine_publica'))}
+                    onCheckedChange={(v) => form.setValue('vitrine_publica', v)}
+                    disabled={!form.watch('slug')}
+                  />
+                  <Label htmlFor="vitrine_publica">Vitrine pública ativa</Label>
+                </div>
+                {!form.watch('slug') && (
+                  <p className="text-sm text-muted-foreground">Defina um endereço antes de ativar.</p>
+                )}
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="slug">Endereço da vitrine</Label>
                   <Input id="slug" {...form.register('slug')} />

@@ -60,6 +60,7 @@ export const lojaSchema = z.object({
   cor_primaria: corOpcional(),
   cor_secundaria: corOpcional(),
   slug: slugOpcional(),
+  vitrine_publica: z.coerce.boolean().default(false),
   vitrine_headline: textoOpcional(),
   vitrine_subheadline: textoOpcional(),
   vitrine_cta_texto: textoOpcional(),

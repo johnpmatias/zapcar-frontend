@@ -29,6 +29,7 @@ const payloadExemplo: LojaPayload = {
   cor_primaria: null,
   cor_secundaria: null,
   slug: null,
+  vitrine_publica: false,
   vitrine_headline: null,
   vitrine_subheadline: null,
   vitrine_cta_texto: null,

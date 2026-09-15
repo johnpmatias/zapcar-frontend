@@ -44,7 +44,7 @@ export interface Loja {
   created_at: string
 }
 
-export type LojaPayload = Omit<Loja, 'id' | 'user_id' | 'vitrine_publica' | 'created_at'>
+export type LojaPayload = Omit<Loja, 'id' | 'user_id' | 'created_at'>
 
 export const ERRO_SLUG_DUPLICADO = 'Esse endereço já está em uso, escolha outro.'
 

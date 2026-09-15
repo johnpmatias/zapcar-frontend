@@ -69,4 +69,20 @@ describe('lojaSchema', () => {
     const resultado = lojaSchema.safeParse({ ...dadosMinimos, instagram_url: 'instagram.com/lojaX' })
     expect(resultado.success).toBe(true)
   })
+
+  it('vitrine_publica tem valor padrão falso quando omitido', () => {
+    const resultado = lojaSchema.safeParse(dadosMinimos)
+    expect(resultado.success).toBe(true)
+    if (resultado.success) {
+      expect(resultado.data.vitrine_publica).toBe(false)
+    }
+  })
+
+  it('aceita vitrine_publica true', () => {
+    const resultado = lojaSchema.safeParse({ ...dadosMinimos, vitrine_publica: true })
+    expect(resultado.success).toBe(true)
+    if (resultado.success) {
+      expect(resultado.data.vitrine_publica).toBe(true)
+    }
+  })
 })
