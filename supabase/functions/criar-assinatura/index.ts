@@ -30,7 +30,7 @@ Deno.serve(async (req) => {
 
     const { data: loja, error: lojaError } = await supabase
       .from('lojas')
-      .select('id, nome_loja, email_contato, asaas_customer_id')
+      .select('id, nome_loja, email_contato, asaas_customer_id, asaas_subscription_id')
       .eq('user_id', userData.user.id)
       .single()
 
@@ -57,25 +57,36 @@ Deno.serve(async (req) => {
         )
       }
       asaasCustomerId = cliente.id
+
+      // Persist customer ID immediately to avoid orphaning on retry
+      await supabase.from('lojas').update({ asaas_customer_id: asaasCustomerId }).eq('id', loja.id)
     }
 
-    const assinaturaResposta = await fetch(`${ASAAS_API_URL}/subscriptions`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', access_token: ASAAS_API_KEY },
-      body: JSON.stringify({
-        customer: asaasCustomerId,
-        billingType: 'UNDEFINED',
-        cycle: 'MONTHLY',
-        value: PRECO_MENSAL_REAIS,
-        description: 'Assinatura ZapCar',
-      }),
-    })
-    const assinatura = await assinaturaResposta.json()
-    if (!assinaturaResposta.ok) {
-      return new Response(
-        JSON.stringify({ error: assinatura.errors?.[0]?.description ?? 'Erro ao criar assinatura no Asaas.' }),
-        { status: 502, headers: corsHeaders }
-      )
+    let asaasSubscriptionId = loja.asaas_subscription_id as string | null
+    let assinatura: { id: string; errors?: Array<{ description: string }> }
+
+    if (!asaasSubscriptionId) {
+      const assinaturaResposta = await fetch(`${ASAAS_API_URL}/subscriptions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', access_token: ASAAS_API_KEY },
+        body: JSON.stringify({
+          customer: asaasCustomerId,
+          billingType: 'UNDEFINED',
+          cycle: 'MONTHLY',
+          value: PRECO_MENSAL_REAIS,
+          description: 'Assinatura ZapCar',
+        }),
+      })
+      assinatura = await assinaturaResposta.json()
+      if (!assinaturaResposta.ok) {
+        return new Response(
+          JSON.stringify({ error: assinatura.errors?.[0]?.description ?? 'Erro ao criar assinatura no Asaas.' }),
+          { status: 502, headers: corsHeaders }
+        )
+      }
+      asaasSubscriptionId = assinatura.id
+    } else {
+      assinatura = { id: asaasSubscriptionId }
     }
 
     // A assinatura gera a primeira cobrança de forma assíncrona no Asaas —
@@ -86,6 +97,12 @@ Deno.serve(async (req) => {
       { headers: { access_token: ASAAS_API_KEY } }
     )
     const cobrancas = await cobrancasResposta.json()
+    if (!cobrancasResposta.ok) {
+      return new Response(
+        JSON.stringify({ error: 'Erro ao consultar a cobrança gerada.' }),
+        { status: 502, headers: corsHeaders }
+      )
+    }
     const linkPagamento = cobrancas.data?.[0]?.invoiceUrl
 
     if (!linkPagamento) {
