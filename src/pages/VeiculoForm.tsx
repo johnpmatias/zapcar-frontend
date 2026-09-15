@@ -179,6 +179,39 @@ export default function VeiculoFormPage() {
         <CardContent>
           <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
             <div className="flex flex-col gap-2">
+              <Label htmlFor="placa">Placa</Label>
+              <Input id="placa" {...form.register('placa')} />
+              {form.formState.errors.placa && (
+                <p role="alert" className="text-sm text-destructive">
+                  {form.formState.errors.placa.message}
+                </p>
+              )}
+            </div>
+
+            <PlacaLookup
+              placaAtual={(form.watch('placa') as string | undefined) ?? ''}
+              onDadosEncontrados={(dados) => {
+                form.setValue('marca', dados.marca)
+                form.setValue('modelo', dados.modelo)
+                form.setValue('ano_fabricacao', dados.anoFabricacao)
+                form.setValue('ano_modelo', dados.anoModelo)
+                if (dados.cor) form.setValue('cor', dados.cor)
+                if (dados.combustivel) form.setValue('combustivel', dados.combustivel as never)
+                // cambio/carroceria vêm em texto livre da API de placas (nem sempre presentes) —
+                // só aplica se bater exatamente com uma das opções do select, senão fica em branco
+                // pro lojista escolher manualmente.
+                if (dados.cambio && (CAMBIO_OPTIONS as readonly string[]).includes(dados.cambio)) {
+                  form.setValue('cambio', dados.cambio as never)
+                }
+                if (dados.carroceria && (CARROCERIA_OPTIONS as readonly string[]).includes(dados.carroceria)) {
+                  form.setValue('carroceria', dados.carroceria as never)
+                }
+                if (dados.versao) form.setValue('versao', dados.versao)
+                setValorFipeReferencia(dados.valorFipeReferencia ?? null)
+              }}
+            />
+
+            <div className="flex flex-col gap-2">
               <Label htmlFor="marca">Marca</Label>
               <Input id="marca" {...form.register('marca')} />
               {form.formState.errors.marca && (
@@ -322,39 +355,6 @@ export default function VeiculoFormPage() {
               <Label htmlFor="portas">Portas</Label>
               <Input id="portas" type="number" {...form.register('portas')} />
             </div>
-
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="placa">Placa</Label>
-              <Input id="placa" {...form.register('placa')} />
-              {form.formState.errors.placa && (
-                <p role="alert" className="text-sm text-destructive">
-                  {form.formState.errors.placa.message}
-                </p>
-              )}
-            </div>
-
-            <PlacaLookup
-              placaAtual={(form.watch('placa') as string | undefined) ?? ''}
-              onDadosEncontrados={(dados) => {
-                form.setValue('marca', dados.marca)
-                form.setValue('modelo', dados.modelo)
-                form.setValue('ano_fabricacao', dados.anoFabricacao)
-                form.setValue('ano_modelo', dados.anoModelo)
-                if (dados.cor) form.setValue('cor', dados.cor)
-                if (dados.combustivel) form.setValue('combustivel', dados.combustivel as never)
-                // cambio/carroceria vêm em texto livre da API de placas (nem sempre presentes) —
-                // só aplica se bater exatamente com uma das opções do select, senão fica em branco
-                // pro lojista escolher manualmente.
-                if (dados.cambio && (CAMBIO_OPTIONS as readonly string[]).includes(dados.cambio)) {
-                  form.setValue('cambio', dados.cambio as never)
-                }
-                if (dados.carroceria && (CARROCERIA_OPTIONS as readonly string[]).includes(dados.carroceria)) {
-                  form.setValue('carroceria', dados.carroceria as never)
-                }
-                if (dados.versao) form.setValue('versao', dados.versao)
-                setValorFipeReferencia(dados.valorFipeReferencia ?? null)
-              }}
-            />
 
             <div className="flex flex-col gap-2">
               <Label htmlFor="preco_promocional">Preço promocional</Label>
