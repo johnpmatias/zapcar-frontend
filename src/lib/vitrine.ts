@@ -48,6 +48,22 @@ const COLUNAS_LOJA_PUBLICA =
   'vitrine_headline,vitrine_subheadline,vitrine_cta_texto,vitrine_cta_destino,vitrine_destaque_url,' +
   'meta_titulo,meta_descricao,og_image_url,instagram_url,facebook_url,tiktok_url,youtube_url,meta_pixel_id,google_tag_id'
 
+// Somente as colunas que o card público (CardVeiculo) de fato renderiza — evita expor
+// placa, placa_final, loja_id e outros campos internos na resposta JSON pública.
+const COLUNAS_VEICULO_PUBLICO =
+  'id,marca,modelo,versao,ano_modelo,km,preco,preco_promocional,status,fotos,foto_capa,ordem'
+
+/**
+ * Retorna true somente se a string começar com http:// ou https:// (case-insensitive).
+ * Usada para impedir que campos de URL preenchidos livremente pelo lojista (ex.:
+ * vitrine_cta_destino, redes sociais) virem um `javascript:` executável quando
+ * renderizados como href/src na vitrine pública.
+ */
+export function ehUrlSegura(url: string | null | undefined): boolean {
+  if (!url) return false
+  return /^https?:\/\//i.test(url)
+}
+
 export async function getLojaPublica(slug: string): Promise<LojaPublica | null> {
   const { data, error } = await supabase
     .from('lojas')
@@ -63,7 +79,7 @@ export async function getLojaPublica(slug: string): Promise<LojaPublica | null> 
 export async function listVeiculosPublicos(lojaId: string): Promise<Veiculo[]> {
   const { data, error } = await supabase
     .from('veiculos')
-    .select('*')
+    .select(COLUNAS_VEICULO_PUBLICO)
     .eq('loja_id', lojaId)
     .order('ordem', { ascending: true })
     .order('created_at', { ascending: false })
