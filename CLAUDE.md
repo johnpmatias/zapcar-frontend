@@ -35,6 +35,9 @@ Plano de implementação de Dashboard CRM: `docs/superpowers/plans/2026-09-15-da
 O Dashboard CRM (rota `/leads`) está completo e no ar: oferece gestão centralizada de leads com histórico de conversa, indicadores de temperatura do lead (engajamento) e controle manual do atendimento.
 
 Spec de Landing page: `docs/superpowers/specs/2026-09-15-landing-page-design.md`
+Plano de implementação de Landing page: `docs/superpowers/plans/2026-09-15-landing-page.md`
+
+A Landing page está completa e no ar: página pública em `/` com Hero, features, "Como funciona" e CTA final, com redirecionamento automático para `/painel` quando o usuário já está logado.
 
 ## Roteiro — próximos sub-projetos (nesta ordem)
 
@@ -46,7 +49,7 @@ Spec de Landing page: `docs/superpowers/specs/2026-09-15-landing-page-design.md`
    - 3c. ~~Vitrine pública (`/v/:slug`)~~ ✅ completo.
 4. ~~Dashboard CRM~~ ✅ completo.
 5. Billing (Stripe) + landing page — dividido em dois sub-projetos menores:
-   - 5a. Landing page — spec pronta, aguardando plano de implementação.
+   - 5a. ~~Landing page~~ ✅ completo.
    - 5b. Billing (Stripe).
 
 Cada sub-projeto segue o mesmo ciclo: brainstorming (spec) → writing-plans (plano) → subagent-driven-development (execução) → finishing-a-development-branch (merge).
