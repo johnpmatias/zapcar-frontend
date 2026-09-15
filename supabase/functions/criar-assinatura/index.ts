@@ -85,6 +85,9 @@ Deno.serve(async (req) => {
         )
       }
       asaasSubscriptionId = assinatura.id
+
+      // Persist subscription ID immediately to avoid orphaning on retry
+      await supabase.from('lojas').update({ asaas_subscription_id: asaasSubscriptionId }).eq('id', loja.id)
     } else {
       assinatura = { id: asaasSubscriptionId }
     }
