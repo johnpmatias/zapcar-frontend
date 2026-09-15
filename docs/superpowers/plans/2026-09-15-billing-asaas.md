@@ -78,16 +78,43 @@ $$;
 
 grant execute on function public.loja_tem_acesso_completo(uuid) to anon, authenticated;
 
--- Only the service_role (used by the Edge Functions in Tasks 8-10, which
--- bypasses RLS and these column grants) may read or write billing fields
--- directly. This stops an authenticated lojista from self-promoting to
--- "active" via a raw PATCH, and stops the public vitrine query from ever
--- being able to select the raw status.
-revoke update (subscription_status, trial_ends_at, asaas_customer_id, asaas_subscription_id)
-  on public.lojas from authenticated;
-revoke select (subscription_status, trial_ends_at, asaas_customer_id, asaas_subscription_id)
-  on public.lojas from anon;
+-- A column-level `revoke` here would NOT work: Supabase already grants
+-- `authenticated`/`anon` a blanket table-level privilege on every public
+-- table (RLS is the real gate), and in Postgres a table-level grant is not
+-- narrowed by a later column-level revoke — the role would keep full
+-- column access regardless. A BEFORE UPDATE trigger is the correct
+-- mechanism: only `service_role` (used by the Edge Functions in Tasks
+-- 7-9, which bypasses RLS entirely) may ever change these four columns,
+-- regardless of what the RLS policy in Step 4 allows on the rest of the
+-- row. Without this, a lojista mid-trial (where `loja_tem_acesso_completo`
+-- is already true) could PATCH their own row and set
+-- `subscription_status = 'active'` forever, for free.
+create or replace function public.proteger_colunas_billing()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if (
+    new.subscription_status is distinct from old.subscription_status
+    or new.trial_ends_at is distinct from old.trial_ends_at
+    or new.asaas_customer_id is distinct from old.asaas_customer_id
+    or new.asaas_subscription_id is distinct from old.asaas_subscription_id
+  ) and auth.role() <> 'service_role' then
+    raise exception 'Alteração de campos de billing só é permitida pelo back-end (service_role).';
+  end if;
+  return new;
+end;
+$$;
+
+create trigger bloqueia_edicao_billing
+  before update on public.lojas
+  for each row
+  execute function public.proteger_colunas_billing();
 ```
+
+This closes the write side. The read side (`anon` selecting these four columns directly from `lojas` via a raw REST call, instead of through the `loja_tem_acesso_completo` RPC) has the same table-vs-column-grant limitation and is knowingly left open here: what it exposes is only a status enum and a date, not sensitive data, and closing it properly means revoking `anon`'s table-level SELECT entirely and re-granting it column-by-column for the ~30 columns the public vitrine actually needs (matching `COLUNAS_LOJA_PUBLICA` in `src/lib/vitrine.ts`) — a bigger, riskier change than this task's scope justifies, since getting that column list wrong would break the public vitrine outright. Treat as a low-priority future hardening, not a launch blocker.
 
 - [ ] **Step 4: Add restrictive write policies**
 
@@ -1603,6 +1630,8 @@ supabase functions deploy webhook-asaas --no-verify-jwt
 
 `--no-verify-jwt` is required because Asaas calls this endpoint without a Supabase user session. In the Asaas dashboard (sandbox), register the webhook URL `https://<seu-project-ref>.supabase.co/functions/v1/webhook-asaas` and set the same token from `ASAAS_WEBHOOK_TOKEN` as its access token / custom header value, matching the `asaas-access-token` header this function checks.
 
+This function imports its event-mapping logic from `../../../src/lib/asaas-webhook.ts`, reaching outside `supabase/functions/` entirely — a deliberate choice (Task 7) so the same file is unit-tested by this project's Vitest suite, but it deviates from Supabase's documented `supabase/functions/_shared/` convention for shared code. If `supabase functions deploy webhook-asaas` above fails to resolve that import, the fallback is to inline `mapearEventoAsaas`'s body directly into this function's own `index.ts` (duplicating the ~10 lines rather than importing them) — the deploy command failing loudly here is the actual test of whether this pattern works, so don't skip watching its output.
+
 - [ ] **Step 7: Commit**
 
 ```bash
@@ -2291,7 +2320,15 @@ git commit -m "feat: adiciona a pagina /assinatura"
 
 - [ ] **Step 1: Confirmar a SQL da Task 1 já foi aplicada**
 
-No SQL Editor do Supabase, rode a query de verificação da Task 1 Step 5 de novo e confirme as 10 policies restritivas.
+No SQL Editor do Supabase, rode a query de verificação da Task 1 Step 5 de novo e confirme as 10 policies restritivas. Confirme também que o trigger de proteção existe:
+
+```sql
+select tgname, tgrelid::regclass, tgenabled
+from pg_trigger
+where tgname = 'bloqueia_edicao_billing';
+```
+
+Expected: 1 linha, `tgenabled = 'O'` (habilitado). Se quiser, teste manualmente que uma loja em trial não consegue se autopromover: logado como essa loja (ou via `supabase.auth` de teste), tente `update lojas set subscription_status = 'active' where id = '<id-da-loja-de-teste>'` fora do service_role e confirme que a exceção "Alteração de campos de billing só é permitida pelo back-end" é lançada.
 
 - [ ] **Step 2: Subir o servidor de desenvolvimento**
 
