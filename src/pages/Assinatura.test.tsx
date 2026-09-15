@@ -35,6 +35,7 @@ describe('AssinaturaPage', () => {
     render(<AssinaturaPage />)
 
     expect(await screen.findByText(/4 dias/i)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /assinar agora/i })).toBeInTheDocument()
   })
 
   it('mostra o aviso de modo leitura quando a assinatura venceu', async () => {
@@ -65,6 +66,7 @@ describe('AssinaturaPage', () => {
     render(<AssinaturaPage />)
 
     expect(await screen.findByText(/assinatura ativa/i)).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /assinar agora/i })).not.toBeInTheDocument()
   })
 
   it('redireciona pro link de pagamento ao clicar em Assinar agora', async () => {

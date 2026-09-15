@@ -13,7 +13,7 @@ function textoStatus(status: string | null, diasRestantesTrial: number | null): 
 }
 
 export default function AssinaturaPage() {
-  const { status, diasRestantesTrial, temAcessoCompleto, carregando } = useAssinatura()
+  const { status, diasRestantesTrial, carregando } = useAssinatura()
   const [assinando, setAssinando] = useState(false)
   const [erroAssinar, setErroAssinar] = useState<string | null>(null)
   const [cobrancas, setCobrancas] = useState<Cobranca[]>([])
@@ -58,7 +58,7 @@ export default function AssinaturaPage() {
             </p>
           )}
 
-          {!temAcessoCompleto && (
+          {status !== 'active' && (
             <Button onClick={assinar} disabled={assinando}>
               {assinando ? 'Gerando link de pagamento...' : 'Assinar agora'}
             </Button>
